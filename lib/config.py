@@ -219,7 +219,7 @@ def _merge_a_into_b(a, b):
             b[k] = v
 
 
-def cfg_from_list(cfg_list):
+def cfg_from_l      ist(cfg_list):
     """Set config keys via list (e.g., from command line)."""
     from ast import literal_eval
     assert len(cfg_list) % 2 == 0
