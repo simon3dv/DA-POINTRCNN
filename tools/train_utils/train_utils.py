@@ -132,6 +132,9 @@ class Trainer(object):
         loss, tb_dict, disp_dict = self.model_fn(self.model, batch)
 
         loss.backward()
+        print(loss.shape)
+        import ipdb
+        ipdb.set_trace()
         clip_grad_norm_(self.model.parameters(), self.grad_norm_clip)
         self.optimizer.step()
 
