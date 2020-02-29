@@ -144,7 +144,6 @@ def create_scheduler(optimizer, total_steps, last_epoch):
 
 
 if __name__ == "__main__":
-    torch.backends.cudnn.benchmark = True
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(args.cfg_file))[0]
