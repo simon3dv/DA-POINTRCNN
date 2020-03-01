@@ -8,6 +8,7 @@ import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
 from lib.config import cfg
 
+id_max = 10000
 
 class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
@@ -116,7 +117,7 @@ class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
                                                                  len(self.image_idx_list)))
 
     def get_label(self, idx):
-        if idx < 10000:
+        if idx < id_max:
             label_file = os.path.join(self.label_dir, '%06d.txt' % idx)
         else:
             label_file = os.path.join(self.aug_label_dir, '%06d.txt' % idx)
@@ -125,16 +126,16 @@ class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
         return kitti_utils.get_objects_from_label(label_file)
 
     def get_image(self, idx):
-        return super().get_image(idx % 10000)
+        return super().get_image(idx % id_max)
 
     def get_image_shape(self, idx):
-        return super().get_image_shape(idx % 10000)
+        return super().get_image_shape(idx % id_max)
 
     def get_calib(self, idx):
-        return super().get_calib(idx % 10000)
+        return super().get_calib(idx % id_max)
 
     def get_road_plane(self, idx):
-        return super().get_road_plane(idx % 10000)
+        return super().get_road_plane(idx % id_max)
 
     @staticmethod
     def get_rpn_features(rpn_feature_dir, idx):
@@ -246,7 +247,7 @@ class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
 
     def get_rpn_sample(self, index):
         sample_id = int(self.sample_id_list[index])
-        if sample_id < 10000:
+        if sample_id < id_max:
             calib = self.get_calib(sample_id)
             # img = self.get_image(sample_id)
             img_shape = self.get_image_shape(sample_id)
@@ -257,9 +258,9 @@ class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
             pts_rect = calib.project_global_to_cam(pts_global[0:3,:], self.sensor).T
             pts_intensity = pts_lidar[:, 3]
         else:
-            calib = self.get_calib(sample_id % 10000)
-            # img = self.get_image(sample_id % 10000)
-            img_shape = self.get_image_shape(sample_id % 10000)
+            calib = self.get_calib(sample_id % id_max)
+            # img = self.get_image(sample_id % id_max)
+            img_shape = self.get_image_shape(sample_id % id_max)
 
             pts_file = os.path.join(self.aug_pts_dir, '%06d.bin' % sample_id)
             assert os.path.exists(pts_file), '%s' % pts_file
