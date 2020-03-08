@@ -172,8 +172,8 @@ if __name__ == '__main__':
                 ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
     input_data = ans_dict
 
-    input_data['pts_input'] = torch.FloatTensor(input_data['pts_input'])
-    input_data['pts_rect'] = torch.FloatTensor(input_data['pts_rect'])
+    input_data['pts_input'] = torch.FloatTensor(input_data['pts_input']).cuda()
+    input_data['pts_rect'] = torch.FloatTensor(input_data['pts_rect']).cuda()
     print(input_data.keys())
     #ipdb.set_trace()
     training = True
