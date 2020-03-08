@@ -355,7 +355,6 @@ class KittiRCNNDataset(KittiDataset):
         # generate training labels
         rpn_cls_label, rpn_reg_label = self.generate_rpn_training_labels(aug_pts_rect, aug_gt_boxes3d)
 
-        ipdb.set_trace()
         sample_info['pts_input'] = pts_input
         sample_info['pts_rect'] = aug_pts_rect
         sample_info['pts_features'] = ret_pts_features
@@ -1144,8 +1143,21 @@ if __name__ == '__main__':
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
-    cfg.RCNN.ENABLED = True
-    cfg.RPN.ENABLED = cfg.RPN.FIXED = True
+    train_mode = 'rpn'
+    if train_mode == 'rpn':
+        cfg.RPN.ENABLED = True
+        cfg.RCNN.ENABLED = False
+        root_result_dir = os.path.join('../', 'output', 'rpn', cfg.TAG)
+    elif train_mode == 'rcnn':
+        cfg.RCNN.ENABLED = True
+        cfg.RPN.ENABLED = cfg.RPN.FIXED = True
+        root_result_dir = os.path.join('../', 'output', 'rcnn', cfg.TAG)
+    elif train_mode == 'rcnn_offline':
+        cfg.RCNN.ENABLED = True
+        cfg.RPN.ENABLED = False
+        root_result_dir = os.path.join('../', 'output', 'rcnn', cfg.TAG)
+    else:
+        raise NotImplementedError
 
     mode = 'TRAIN'
     DATA_PATH = os.path.join('data')
