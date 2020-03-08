@@ -139,28 +139,21 @@ if __name__ == '__main__':
                                  rcnn_training_feature_dir=None,
                                  gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
 
-    import ipdb
-    ipdb.set_trace()
-    train_set[0]
+    input_data = train_set[0]
 
 
     import torch
     from lib.net.rcnn_net import RCNNNet
     import ipdb
+
     training = True
     output = {}
     rpn = RPN(use_xyz=True, mode=mode).cuda()
     rcnn_net = RCNNNet(num_classes=2, input_channels=128, use_xyz=True)
-
-    pts = torch.zeros((2,1000,3)).float().cuda()
-    gt_boxes = torch.zeros((2,cfg.RPN.NUM_POINTS,8)).float().cuda()
-    input_data = {'pts_input':pts,
-                  'gt_boxes3d':gt_boxes}
-
     rpn_output = rpn(input_data)
 
     output.update(rpn_output)
-
+    ipdb.set_trace()
     with torch.no_grad():
         rpn_cls, rpn_reg = rpn_output['rpn_cls'], rpn_output['rpn_reg']
         backbone_xyz, backbone_features = rpn_output['backbone_xyz'], rpn_output['backbone_features']
