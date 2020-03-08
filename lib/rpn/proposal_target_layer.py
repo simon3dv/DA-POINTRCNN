@@ -12,6 +12,7 @@ class ProposalTargetLayer(nn.Module):
         super().__init__()
 
     def forward(self, input_dict):
+        import ipdb
         roi_boxes3d, gt_boxes3d = input_dict['roi_boxes3d'], input_dict['gt_boxes3d']
 
         batch_rois, batch_gt_of_rois, batch_roi_iou = self.sample_rois_for_rcnn(roi_boxes3d, gt_boxes3d)
