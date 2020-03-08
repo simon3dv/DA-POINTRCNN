@@ -203,7 +203,6 @@ def get_iou3d(corners3d, query_corners3d, need_bev=False):
     N, M = A.shape[0], B.shape[0]
     iou3d = np.zeros((N, M), dtype=np.float32)
     iou_bev = np.zeros((N, M), dtype=np.float32)
-
     # for height overlap, since y face down, use the negative y
     min_h_a = -A[:, 0:4, 1].sum(axis=1) / 4.0
     max_h_a = -A[:, 4:8, 1].sum(axis=1) / 4.0
@@ -217,7 +216,6 @@ def get_iou3d(corners3d, query_corners3d, need_bev=False):
             h_overlap = np.max([0, min_of_max - max_of_min])
             if h_overlap == 0:
                 continue
-
             bottom_a, bottom_b = Polygon(A[i, 0:4, [0, 2]].T), Polygon(B[j, 0:4, [0, 2]].T)
             if bottom_a.is_valid and bottom_b.is_valid:
                 # check is valid,  A valid Polygon may not possess any overlapping exterior or interior rings.
@@ -228,6 +226,7 @@ def get_iou3d(corners3d, query_corners3d, need_bev=False):
             union3d = bottom_a.area * (max_h_a[i] - min_h_a[i]) + bottom_b.area * (max_h_b[j] - min_h_b[j]) - overlap3d
             iou3d[i][j] = overlap3d / union3d
             iou_bev[i][j] = bottom_overlap / (bottom_a.area + bottom_b.area - bottom_overlap)
+
 
     if need_bev:
         return iou3d, iou_bev

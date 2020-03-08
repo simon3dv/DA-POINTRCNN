@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 import numpy as np
 import os
 import pickle
@@ -7,7 +9,7 @@ from lib.datasets.kitti_dataset import KittiDataset
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
 from lib.config import cfg
-
+import ipdb
 
 class KittiRCNNDataset(KittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
@@ -93,6 +95,7 @@ class KittiRCNNDataset(KittiDataset):
                     # logger.info('No gt classes: %06d' % sample_id)
                     continue
                 self.sample_id_list.append(sample_id)
+
 
             print('Done: filter %s results for rcnn training: %d / %d\n' %
                   (self.mode, len(self.sample_id_list), len(self.image_idx_list)))
@@ -320,7 +323,6 @@ class KittiRCNNDataset(KittiDataset):
             sample_info['pts_rect'] = ret_pts_rect
             sample_info['pts_features'] = ret_pts_features
             return sample_info
-
         gt_obj_list = self.filtrate_objects(self.get_label(sample_id))
         if cfg.GT_AUG_ENABLED and self.mode == 'TRAIN' and gt_aug_flag:
             gt_obj_list.extend(extra_gt_obj_list)
@@ -343,7 +345,7 @@ class KittiRCNNDataset(KittiDataset):
             pts_input = np.concatenate((aug_pts_rect, ret_pts_features), axis=1)  # (N, C)
         else:
             pts_input = aug_pts_rect
-
+        ipdb.set_trace()
         if cfg.RPN.FIXED:
             sample_info['pts_input'] = pts_input
             sample_info['pts_rect'] = aug_pts_rect
@@ -930,8 +932,6 @@ class KittiRCNNDataset(KittiDataset):
             bg_inds = self.sample_bg_inds(hard_bg_inds, easy_bg_inds, bg_rois_per_this_image)
             fg_rois_per_this_image = 0
         else:
-            import pdb
-            pdb.set_trace()
             raise NotImplementedError
 
         # augment the rois by noise
@@ -1138,4 +1138,44 @@ class KittiRCNNDataset(KittiDataset):
 
 
 if __name__ == '__main__':
-    pass
+    from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
+    cfg_file = 'tools/cfgs/default.yaml'
+    cfg_from_file(cfg_file)
+    cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
+
+    cfg.RCNN.ENABLED = True
+    cfg.RPN.ENABLED = cfg.RPN.FIXED = True
+
+    mode = 'TRAIN'
+    DATA_PATH = os.path.join('data')
+
+    import logging
+    def create_logger(log_file):
+        log_format = '%(asctime)s  %(levelname)5s  %(message)s'
+        logging.basicConfig(level=logging.INFO, format=log_format, filename=log_file)
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        console.setFormatter(logging.Formatter(log_format))
+        logging.getLogger(__name__).addHandler(console)
+        return logging.getLogger(__name__)
+
+    root_result_dir = os.path.join('output', 'rcnn', cfg.TAG)
+    log_file = os.path.join(root_result_dir, 'log_eval_one.txt')
+    logger = create_logger(log_file)
+    """
+    dataset = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode=mode,
+                                random_select=False,
+                                rcnn_eval_roi_dir=None,
+                                rcnn_eval_feature_dir=None,
+                                classes=cfg.CLASSES,
+                                logger=logger)
+    dataset[0]
+    """
+    train_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.SPLIT, mode='TRAIN',
+                                 logger=logger,
+                                 classes=cfg.CLASSES,
+                                 rcnn_training_roi_dir=None,
+                                 rcnn_training_feature_dir=None,
+                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
+
+    train_set[0]

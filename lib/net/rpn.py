@@ -1,3 +1,5 @@
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../'))
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
@@ -81,3 +83,57 @@ class RPN(nn.Module):
 
         return ret_dict
 
+if __name__ == '__main__':
+    from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
+    cfg_file = 'tools/cfgs/default.yaml'
+    cfg_from_file(cfg_file)
+    cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
+
+    cfg.RCNN.ENABLED = True
+    cfg.RPN.ENABLED = cfg.RPN.FIXED = True
+
+    mode = 'TRAIN'
+
+    import torch
+    from lib.net.rcnn_net import RCNNNet
+    import ipdb
+    training = True
+    output = {}
+    rpn = RPN(use_xyz=True, mode=mode).cuda()
+    rcnn_net = RCNNNet(num_classes=2, input_channels=128, use_xyz=True)
+
+    pts = torch.zeros((2,1000,3)).float().cuda()
+    gt_boxes = torch.zeros((2,8)).float().cuda()
+    input_data = {'pts_input':pts,
+                  'gt_boxes3d':gt_boxes}
+
+    rpn_output = rpn(input_data)
+
+    output.update(rpn_output)
+
+    with torch.no_grad():
+        rpn_cls, rpn_reg = rpn_output['rpn_cls'], rpn_output['rpn_reg']
+        backbone_xyz, backbone_features = rpn_output['backbone_xyz'], rpn_output['backbone_features']
+
+        rpn_scores_raw = rpn_cls[:, :, 0]
+        rpn_scores_norm = torch.sigmoid(rpn_scores_raw)
+        seg_mask = (rpn_scores_norm > cfg.RPN.SCORE_THRESH).float()
+        pts_depth = torch.norm(backbone_xyz, p=2, dim=2)
+
+        # proposal layer
+        rois, roi_scores_raw = rpn.proposal_layer(rpn_scores_raw, rpn_reg, backbone_xyz)  # (B, M, 7)
+        output['rois'] = rois
+        output['roi_scores_raw'] = roi_scores_raw
+        output['seg_result'] = seg_mask
+
+    rcnn_input_info = {'rpn_xyz': backbone_xyz,#B,N,3
+                       'rpn_features': backbone_features.permute((0, 2, 1)),#B,N,128
+                       'seg_mask': seg_mask,#B,N
+                       'roi_boxes3d': rois,#B,M,7
+                       'pts_depth': pts_depth}#B,N
+    if training:
+        rcnn_input_info['gt_boxes3d'] = input_data['gt_boxes3d']
+    rcnn_output = rcnn_net(rcnn_input_info)
+    ipdb.set_trace()
+
+    output.update(rcnn_output)

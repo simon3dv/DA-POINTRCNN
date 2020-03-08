@@ -33,7 +33,6 @@ class ProposalLayer(nn.Module):
 
         scores = rpn_scores
         _, sorted_idxs = torch.sort(scores, dim=1, descending=True)
-
         batch_size = scores.size(0)
         ret_bbox3d = scores.new(batch_size, cfg[self.mode].RPN_POST_NMS_TOP_N, 7).zero_()
         ret_scores = scores.new(batch_size, cfg[self.mode].RPN_POST_NMS_TOP_N).zero_()

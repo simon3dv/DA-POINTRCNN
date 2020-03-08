@@ -82,7 +82,6 @@ class RCNNNet(nn.Module):
 
         self.proposal_target_layer = ProposalTargetLayer()
         self.init_weights(weight_init='xavier')
-
     def init_weights(self, weight_init='xavier'):
         if weight_init == 'kaiming':
             init_func = nn.init.kaiming_normal_
