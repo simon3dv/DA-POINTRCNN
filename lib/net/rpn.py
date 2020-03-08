@@ -139,11 +139,38 @@ if __name__ == '__main__':
                                  rcnn_training_feature_dir=None,
                                  gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
 
-    input_data = train_set[0]
+    batch = train_set
+    batch_size = 1
     import ipdb
     ipdb.set_trace()
-    input_data = {key: value.unsqueeze(0).cuda() for key, value in input_data.items()}
+    ans_dict = {}
 
+    for key in batch[0].keys():
+        if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
+                (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
+            max_gt = 0
+            for k in range(batch_size):
+                max_gt = max(max_gt, batch[k][key].__len__())
+            batch_gt_boxes3d = np.zeros((batch_size, max_gt, 7), dtype=np.float32)
+            for i in range(batch_size):
+                batch_gt_boxes3d[i, :batch[i][key].__len__(), :] = batch[i][key]
+            ans_dict[key] = batch_gt_boxes3d
+            continue
+
+        if isinstance(batch[0][key], np.ndarray):
+            if batch_size == 1:
+                ans_dict[key] = batch[0][key][np.newaxis, ...]
+            else:
+                ans_dict[key] = np.concatenate([batch[k][key][np.newaxis, ...] for k in range(batch_size)], axis=0)
+
+        else:
+            ans_dict[key] = [batch[k][key] for k in range(batch_size)]
+            if isinstance(batch[0][key], int):
+                ans_dict[key] = np.array(ans_dict[key], dtype=np.int32)
+            elif isinstance(batch[0][key], float):
+                ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
+    input_data = ans_dict
+    
     import torch
     from lib.net.rcnn_net import RCNNNet
     import ipdb
