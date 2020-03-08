@@ -181,9 +181,14 @@ if __name__ == '__main__':
     rpn = RPN(use_xyz=True, mode=mode).cuda()
     rcnn_net = RCNNNet(num_classes=2, input_channels=128, use_xyz=True).cuda()
     rpn_output = rpn(input_data)
+    """
+    rpn_cls:B,N=16384,1
+    rpn_reg:B,N,76
+    backbone_xyz:B,N,3
+    backbone_features:B,128,N
+    """
 
     output.update(rpn_output)
-    ipdb.set_trace()
     with torch.no_grad():
         rpn_cls, rpn_reg = rpn_output['rpn_cls'], rpn_output['rpn_reg']
         backbone_xyz, backbone_features = rpn_output['backbone_xyz'], rpn_output['backbone_features']
