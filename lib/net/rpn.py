@@ -140,7 +140,7 @@ if __name__ == '__main__':
                                  gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
 
     input_data = train_set[0]
-    input_data = {key: value.cuda() for key, value in input_data.items()}
+    input_data = {key: value.unsqueeze(0).cuda() for key, value in input_data.items()}
 
     import torch
     from lib.net.rcnn_net import RCNNNet
