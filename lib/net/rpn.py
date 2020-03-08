@@ -84,6 +84,7 @@ class RPN(nn.Module):
         return ret_dict
 
 if __name__ == '__main__':
+    import ipdb
     from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
     cfg_file = 'tools/cfgs/default.yaml'
     cfg_from_file(cfg_file)
@@ -151,6 +152,7 @@ if __name__ == '__main__':
                 max_gt = max(max_gt, batch[k][key].__len__())
             batch_gt_boxes3d = np.zeros((batch_size, max_gt, 7), dtype=np.float32)
             for i in range(batch_size):
+                ipdb.set_trace()
                 batch_gt_boxes3d[i, :batch[i][key].__len__(), :] = batch[i][key]
             ans_dict[key] = batch_gt_boxes3d
             continue
@@ -171,7 +173,6 @@ if __name__ == '__main__':
 
     import torch
     from lib.net.rcnn_net import RCNNNet
-    import ipdb
 
     training = True
     output = {}
