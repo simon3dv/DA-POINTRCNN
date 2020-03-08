@@ -166,6 +166,7 @@ def eval_one_epoch_rpn(model, dataloader, epoch_id, result_dir, logger):
         # proposal layer
         rois, roi_scores_raw = model.rpn.proposal_layer(rpn_scores_raw, rpn_reg, backbone_xyz)  # (B, M, 7)
         batch_size = rois.shape[0]
+        ipdb.set_trace()
 
         # calculate recall and save results to file
         for bs_idx in range(batch_size):

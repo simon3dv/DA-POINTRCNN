@@ -161,16 +161,16 @@ class RCNNNet(nn.Module):
                 target_dict['reg_valid_mask'] = input_data['reg_valid_mask']
                 target_dict['gt_of_rois'] = input_data['gt_boxes3d_ct']
 
-        xyz, features = self._break_up_pc(pts_input)
+        xyz, features = self._break_up_pc(pts_input) # (64, 512, 3), (64,130,512)
 
         if cfg.RCNN.USE_RPN_FEATURES:
-            xyz_input = pts_input[..., 0:self.rcnn_input_channel].transpose(1, 2).unsqueeze(dim=3)
+            xyz_input = pts_input[..., 0:self.rcnn_input_channel].transpose(1, 2).unsqueeze(dim=3)# (64, 5, 512, 1)
             xyz_feature = self.xyz_up_layer(xyz_input)
 
-            rpn_feature = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)
+            rpn_feature = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)# (64, 128, 512, 1)
 
             merged_feature = torch.cat((xyz_feature, rpn_feature), dim=1)
-            merged_feature = self.merge_down_layer(merged_feature)
+            merged_feature = self.merge_down_layer(merged_feature) # (64, 128, 512, 1)
             l_xyz, l_features = [xyz], [merged_feature.squeeze(dim=3)]
         else:
             l_xyz, l_features = [xyz], [features]
@@ -185,6 +185,4 @@ class RCNNNet(nn.Module):
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
         if self.training:
             ret_dict.update(target_dict)
-        import ipdb
-        ipdb.set_trace()
         return ret_dict
