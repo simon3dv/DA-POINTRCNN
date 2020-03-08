@@ -89,10 +89,60 @@ if __name__ == '__main__':
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
-    cfg.RCNN.ENABLED = True
-    cfg.RPN.ENABLED = cfg.RPN.FIXED = True
+    train_mode = 'rcnn'
+    if train_mode == 'rpn':
+        cfg.RPN.ENABLED = True
+        cfg.RCNN.ENABLED = False
+        root_result_dir = os.path.join('../', 'output', 'rpn', cfg.TAG)
+    elif train_mode == 'rcnn':
+        cfg.RCNN.ENABLED = True
+        cfg.RPN.ENABLED = cfg.RPN.FIXED = True
+        root_result_dir = os.path.join('../', 'output', 'rcnn', cfg.TAG)
+    elif train_mode == 'rcnn_offline':
+        cfg.RCNN.ENABLED = True
+        cfg.RPN.ENABLED = False
+        root_result_dir = os.path.join('../', 'output', 'rcnn', cfg.TAG)
+    else:
+        raise NotImplementedError
+
 
     mode = 'TRAIN'
+    DATA_PATH = os.path.join('data')
+
+    import logging
+    def create_logger(log_file):
+        log_format = '%(asctime)s  %(levelname)5s  %(message)s'
+        logging.basicConfig(level=logging.INFO, format=log_format, filename=log_file)
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        console.setFormatter(logging.Formatter(log_format))
+        logging.getLogger(__name__).addHandler(console)
+        return logging.getLogger(__name__)
+
+    root_result_dir = os.path.join('output', 'rcnn', cfg.TAG)
+    log_file = os.path.join(root_result_dir, 'log_eval_one.txt')
+    logger = create_logger(log_file)
+    """
+    dataset = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode=mode,
+                                random_select=False,
+                                rcnn_eval_roi_dir=None,
+                                rcnn_eval_feature_dir=None,
+                                classes=cfg.CLASSES,
+                                logger=logger)
+    dataset[0]
+    """
+    from lib.datasets.kitti_rcnn_dataset import  KittiRCNNDataset
+    train_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.SPLIT, mode='TRAIN',
+                                 logger=logger,
+                                 classes=cfg.CLASSES,
+                                 rcnn_training_roi_dir=None,
+                                 rcnn_training_feature_dir=None,
+                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
+
+    import ipdb
+    ipdb.set_trace()
+    train_set[0]
+
 
     import torch
     from lib.net.rcnn_net import RCNNNet
@@ -103,7 +153,7 @@ if __name__ == '__main__':
     rcnn_net = RCNNNet(num_classes=2, input_channels=128, use_xyz=True)
 
     pts = torch.zeros((2,1000,3)).float().cuda()
-    gt_boxes = torch.zeros((2,8)).float().cuda()
+    gt_boxes = torch.zeros((2,cfg.RPN.NUM_POINTS,8)).float().cuda()
     input_data = {'pts_input':pts,
                   'gt_boxes3d':gt_boxes}
 
