@@ -88,8 +88,6 @@ class ProposalLayer(nn.Module):
                 # fetch pre nms top K
                 cur_scores = cur_scores[:pre_top_n_list[i]]
                 cur_proposals = cur_proposals[:pre_top_n_list[i]]
-                import ipdb
-                ipdb.set_trace()
             else:
                 assert i == 2, '%d' % i
                 # this area doesn't have any points, so use rois of first area

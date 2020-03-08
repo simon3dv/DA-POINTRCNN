@@ -64,7 +64,7 @@ class ProposalTargetLayer(nn.Module):
         invalid_mask = (batch_roi_iou > cfg.RCNN.CLS_BG_THRESH) & (batch_roi_iou < cfg.RCNN.CLS_FG_THRESH)
         batch_cls_label[valid_mask == 0] = -1
         batch_cls_label[invalid_mask > 0] = -1
-
+        ipdb.set_trace()
         output_dict = {'sampled_pts': sampled_pts.view(-1, cfg.RCNN.NUM_POINTS, 3),
                        'pts_feature': sampled_features.view(-1, cfg.RCNN.NUM_POINTS, sampled_features.shape[3]),
                        'cls_label': batch_cls_label.view(-1),
