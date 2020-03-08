@@ -174,6 +174,7 @@ if __name__ == '__main__':
 
     input_data['pts_input'] = torch.FloatTensor(input_data['pts_input']).cuda()
     input_data['pts_rect'] = torch.FloatTensor(input_data['pts_rect']).cuda()
+    input_data['gt_boxes3d'] = torch.FloatTensor(input_data['gt_boxes3d']).cuda()
     print(input_data.keys())
     #ipdb.set_trace()
     training = True
