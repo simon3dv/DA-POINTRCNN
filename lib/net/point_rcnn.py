@@ -50,8 +50,6 @@ class PointRCNN(nn.Module):
                     output['rois'] = rois
                     output['roi_scores_raw'] = roi_scores_raw
                     output['seg_result'] = seg_mask
-                    import ipdb
-                    ipdb.set_trace()
                 rcnn_input_info = {'rpn_xyz': backbone_xyz,
                                    'rpn_features': backbone_features.permute((0, 2, 1)),
                                    'seg_mask': seg_mask,

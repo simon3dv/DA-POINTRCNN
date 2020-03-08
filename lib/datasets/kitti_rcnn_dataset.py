@@ -392,7 +392,6 @@ class KittiRCNNDataset(KittiDataset):
             reg_label[fg_pt_flag, 4] = gt_boxes3d[k][4]  # w
             reg_label[fg_pt_flag, 5] = gt_boxes3d[k][5]  # l
             reg_label[fg_pt_flag, 6] = gt_boxes3d[k][6]  # ry
-            ipdb.set_trace()
 
         return cls_label, reg_label
 
@@ -1144,7 +1143,7 @@ if __name__ == '__main__':
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
-    train_mode = 'rpn'
+    train_mode = 'rcnn'
     if train_mode == 'rpn':
         cfg.RPN.ENABLED = True
         cfg.RCNN.ENABLED = False

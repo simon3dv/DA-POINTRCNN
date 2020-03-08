@@ -12,7 +12,6 @@ class ProposalTargetLayer(nn.Module):
         super().__init__()
 
     def forward(self, input_dict):
-        import ipdb
         roi_boxes3d, gt_boxes3d = input_dict['roi_boxes3d'], input_dict['gt_boxes3d']
 
         batch_rois, batch_gt_of_rois, batch_roi_iou = self.sample_rois_for_rcnn(roi_boxes3d, gt_boxes3d)
@@ -65,7 +64,6 @@ class ProposalTargetLayer(nn.Module):
         invalid_mask = (batch_roi_iou > cfg.RCNN.CLS_BG_THRESH) & (batch_roi_iou < cfg.RCNN.CLS_FG_THRESH)
         batch_cls_label[valid_mask == 0] = -1
         batch_cls_label[invalid_mask > 0] = -1
-        ipdb.set_trace()
         output_dict = {'sampled_pts': sampled_pts.view(-1, cfg.RCNN.NUM_POINTS, 3),
                        'pts_feature': sampled_features.view(-1, cfg.RCNN.NUM_POINTS, sampled_features.shape[3]),
                        'cls_label': batch_cls_label.view(-1),
@@ -145,8 +143,6 @@ class ProposalTargetLayer(nn.Module):
 
                 fg_rois_per_this_image = 0
             else:
-                import pdb
-                pdb.set_trace()
                 raise NotImplementedError
 
             # augment the rois by noise

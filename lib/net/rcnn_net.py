@@ -183,8 +183,7 @@ class RCNNNet(nn.Module):
         rcnn_cls = self.cls_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
-        import ipdb
-        ipdb.set_trace()
         if self.training:
             ret_dict.update(target_dict)
+        ipdb.set_trace()
         return ret_dict
