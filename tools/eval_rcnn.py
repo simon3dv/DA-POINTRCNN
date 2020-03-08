@@ -166,7 +166,6 @@ def eval_one_epoch_rpn(model, dataloader, epoch_id, result_dir, logger):
         # proposal layer
         rois, roi_scores_raw = model.rpn.proposal_layer(rpn_scores_raw, rpn_reg, backbone_xyz)  # (B, M, 7)
         batch_size = rois.shape[0]
-        ipdb.set_trace()
 
         # calculate recall and save results to file
         for bs_idx in range(batch_size):
@@ -515,7 +514,7 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
                                           get_xz_fine=True, get_y_by_bin=cfg.RCNN.LOC_Y_BY_BIN,
                                           loc_y_scope=cfg.RCNN.LOC_Y_SCOPE, loc_y_bin_size=cfg.RCNN.LOC_Y_BIN_SIZE,
                                           get_ry_fine=True).view(batch_size, -1, 7)
-
+        ipdb.set_trace()
         # scoring
         if rcnn_cls.shape[2] == 1:
             raw_scores = rcnn_cls  # (B, M, 1)
