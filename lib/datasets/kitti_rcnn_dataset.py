@@ -345,7 +345,6 @@ class KittiRCNNDataset(KittiDataset):
             pts_input = np.concatenate((aug_pts_rect, ret_pts_features), axis=1)  # (N, C)
         else:
             pts_input = aug_pts_rect
-        ipdb.set_trace()
         if cfg.RPN.FIXED:
             sample_info['pts_input'] = pts_input
             sample_info['pts_rect'] = aug_pts_rect
@@ -355,6 +354,8 @@ class KittiRCNNDataset(KittiDataset):
 
         # generate training labels
         rpn_cls_label, rpn_reg_label = self.generate_rpn_training_labels(aug_pts_rect, aug_gt_boxes3d)
+
+        ipdb.set_trace()
         sample_info['pts_input'] = pts_input
         sample_info['pts_rect'] = aug_pts_rect
         sample_info['pts_features'] = ret_pts_features
