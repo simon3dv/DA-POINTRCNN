@@ -213,6 +213,14 @@ if __name__ == '__main__':
     if training:
         rcnn_input_info['gt_boxes3d'] = input_data['gt_boxes3d']
     rcnn_output = rcnn_net(rcnn_input_info)
-    ipdb.set_trace()
+    """
+    rcnn_cls:64,1
+    rcnn_reg:64,46
+    sampled_pts:64,512,3
+    pts_feature:64,512,130
+    cls_label:64
+    reg_valid_mask:64
+    gt_of_rois:64,7
+    """
 
     output.update(rcnn_output)
