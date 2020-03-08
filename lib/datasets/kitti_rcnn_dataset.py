@@ -354,7 +354,7 @@ class KittiRCNNDataset(KittiDataset):
 
         # generate training labels
         rpn_cls_label, rpn_reg_label = self.generate_rpn_training_labels(aug_pts_rect, aug_gt_boxes3d)
-
+        ipdb.set_trace()
         sample_info['pts_input'] = pts_input
         sample_info['pts_rect'] = aug_pts_rect
         sample_info['pts_features'] = ret_pts_features
