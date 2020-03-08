@@ -140,6 +140,8 @@ if __name__ == '__main__':
                                  gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
 
     input_data = train_set[0]
+    import ipdb
+    ipdb.set_trace()
     input_data = {key: value.unsqueeze(0).cuda() for key, value in input_data.items()}
 
     import torch
