@@ -185,5 +185,6 @@ class RCNNNet(nn.Module):
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
         if self.training:
             ret_dict.update(target_dict)
+        import ipdb
         ipdb.set_trace()
         return ret_dict
