@@ -86,6 +86,8 @@ class RPN(nn.Module):
 if __name__ == '__main__':
     import ipdb
     from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
+    import torch
+    from lib.net.rcnn_net import RCNNNet
     cfg_file = 'tools/cfgs/default.yaml'
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
@@ -170,8 +172,7 @@ if __name__ == '__main__':
                 ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
     input_data = ans_dict
 
-    import torch
-    from lib.net.rcnn_net import RCNNNet
+    input_data = {key: torch.tensor(value).cuda() for key, value in input_data.items()}
 
     training = True
     output = {}
