@@ -353,8 +353,8 @@ class KittiRCNNDataset(KittiDataset):
             return sample_info
 
         # generate training labels
-        rpn_cls_label, rpn_reg_label = self.generate_rpn_training_labels(aug_pts_rect, aug_gt_boxes3d)
-        ipdb.set_trace()
+        rpn_cls_label, rpn_reg_label = self.generate_rpn_training_labels(aug_pts_rect, aug_gt_boxes3d)#(N,),(N,7)
+
         sample_info['pts_input'] = pts_input
         sample_info['pts_rect'] = aug_pts_rect
         sample_info['pts_features'] = ret_pts_features
@@ -392,6 +392,7 @@ class KittiRCNNDataset(KittiDataset):
             reg_label[fg_pt_flag, 4] = gt_boxes3d[k][4]  # w
             reg_label[fg_pt_flag, 5] = gt_boxes3d[k][5]  # l
             reg_label[fg_pt_flag, 6] = gt_boxes3d[k][6]  # ry
+            ipdb.set_trace()
 
         return cls_label, reg_label
 
