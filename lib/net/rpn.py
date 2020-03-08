@@ -141,8 +141,6 @@ if __name__ == '__main__':
 
     batch = train_set
     batch_size = 1
-    import ipdb
-    ipdb.set_trace()
     ans_dict = {}
 
     for key in batch[0].keys():
@@ -170,7 +168,7 @@ if __name__ == '__main__':
             elif isinstance(batch[0][key], float):
                 ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
     input_data = ans_dict
-    
+
     import torch
     from lib.net.rcnn_net import RCNNNet
     import ipdb
