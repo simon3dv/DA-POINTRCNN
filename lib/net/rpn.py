@@ -138,7 +138,7 @@ if __name__ == '__main__':
                                  classes=cfg.CLASSES,
                                  rcnn_training_roi_dir=None,
                                  rcnn_training_feature_dir=None,
-                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl'
+                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl',
                                  shuffle=False)
 
     batch = train_set
@@ -153,7 +153,6 @@ if __name__ == '__main__':
                 max_gt = max(max_gt, batch[k][key].__len__())
             batch_gt_boxes3d = np.zeros((batch_size, max_gt, 7), dtype=np.float32)
             for i in range(batch_size):
-                ipdb.set_trace()
                 batch_gt_boxes3d[i, :batch[i][key].__len__(), :] = batch[i][key]
             ans_dict[key] = batch_gt_boxes3d
             continue
