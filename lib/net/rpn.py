@@ -172,8 +172,7 @@ if __name__ == '__main__':
                 ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
     input_data = ans_dict
 
-    input_data = {key: torch.tensor(value).cuda() for key, value in input_data.items()}
-
+    ipdb.set_trace()
     training = True
     output = {}
     rpn = RPN(use_xyz=True, mode=mode).cuda()
