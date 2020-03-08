@@ -138,7 +138,8 @@ if __name__ == '__main__':
                                  classes=cfg.CLASSES,
                                  rcnn_training_roi_dir=None,
                                  rcnn_training_feature_dir=None,
-                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
+                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl'
+                                 shuffle=False)
 
     batch = train_set
     batch_size = 1
