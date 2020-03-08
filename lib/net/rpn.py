@@ -175,7 +175,6 @@ if __name__ == '__main__':
     input_data['pts_input'] = torch.FloatTensor(input_data['pts_input']).cuda()
     input_data['pts_rect'] = torch.FloatTensor(input_data['pts_rect']).cuda()
     input_data['gt_boxes3d'] = torch.FloatTensor(input_data['gt_boxes3d']).cuda()
-    print(input_data.keys())
     #ipdb.set_trace()
     training = True
     output = {}
@@ -213,6 +212,7 @@ if __name__ == '__main__':
     if training:
         rcnn_input_info['gt_boxes3d'] = input_data['gt_boxes3d']
     rcnn_output = rcnn_net(rcnn_input_info)
+    ipdb.set_trace()
     """
     rcnn_cls:64,1
     rcnn_reg:64,46
