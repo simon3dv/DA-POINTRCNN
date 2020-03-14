@@ -11,7 +11,7 @@ import logging
 from functools import partial
 
 from lib.net.generalized_point_rcnn import GeneralizedPointRCNN
-import lib.net.train_functions as train_functions
+import lib.net.train_functions_da as train_functions
 from lib.datasets.kitti_rcnn_dataset import KittiRCNNDataset
 from lib.datasets.nuscenes2kitti_rcnn_dataset import Nuscenes2KittiRCNNDataset
 from lib.config import cfg, cfg_from_file, save_config_to_file
