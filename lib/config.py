@@ -80,6 +80,16 @@ __C.RPN.SCORE_THRESH = 0.3
 __C.RCNN = edict()
 __C.RCNN.ENABLED = False
 
+# 3. config of domain adaptation network
+__C.DA = edict()
+__C.DA.ENABLED = False
+__C.DA.SOURCE = edict()
+__C.DA.SOURCE.SPLIT = 'train'
+__C.DA.SOURCE.VAL_SPLIT = 'val'
+__C.DA.TARGET = edict()
+__C.DA.TARGET.SPLIT = 'v1.0-train'
+__C.DA.TARGET.VAL_SPLIT = 'v1.0-val'
+
 # config of input
 __C.RCNN.USE_RPN_FEATURES = True
 __C.RCNN.USE_MASK = True

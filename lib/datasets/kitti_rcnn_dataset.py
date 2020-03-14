@@ -14,7 +14,7 @@ import ipdb
 class KittiRCNNDataset(KittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
                  logger=None, rcnn_training_roi_dir=None, rcnn_training_feature_dir=None, rcnn_eval_roi_dir=None,
-                 rcnn_eval_feature_dir=None, gt_database_dir=None):
+                 rcnn_eval_feature_dir=None, gt_database_dir=None, is_source=True):
         super().__init__(root_dir=root_dir, split=split)
         if classes == 'Car':
             self.classes = ('Background', 'Car')
@@ -99,6 +99,8 @@ class KittiRCNNDataset(KittiDataset):
 
             print('Done: filter %s results for rcnn training: %d / %d\n' %
                   (self.mode, len(self.sample_id_list), len(self.image_idx_list)))
+
+        self.is_source = is_source
 
     def preprocess_rpn_training_data(self):
         """
@@ -361,6 +363,8 @@ class KittiRCNNDataset(KittiDataset):
         sample_info['rpn_cls_label'] = rpn_cls_label
         sample_info['rpn_reg_label'] = rpn_reg_label
         sample_info['gt_boxes3d'] = aug_gt_boxes3d
+        sample_info['is_source'] = True if self.is_source else False
+
         return sample_info
 
     @staticmethod
@@ -1139,11 +1143,11 @@ class KittiRCNNDataset(KittiDataset):
 
 if __name__ == '__main__':
     from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
-    cfg_file = 'tools/cfgs/default.yaml'
+    cfg_file = 'cfgs/default_k2n.yaml'#'tools/cfgs/default.yaml'
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
-    train_mode = 'rcnn'
+    train_mode = 'rpn'
     if train_mode == 'rpn':
         cfg.RPN.ENABLED = True
         cfg.RCNN.ENABLED = False
@@ -1160,7 +1164,7 @@ if __name__ == '__main__':
         raise NotImplementedError
 
     mode = 'TRAIN'
-    DATA_PATH = os.path.join('data')
+    DATA_PATH = os.path.join('..','data')
 
     import logging
     def create_logger(log_file):
@@ -1173,6 +1177,7 @@ if __name__ == '__main__':
         return logging.getLogger(__name__)
 
     root_result_dir = os.path.join('output', 'rcnn', cfg.TAG)
+    os.makedirs(root_result_dir, exist_ok=True)
     log_file = os.path.join(root_result_dir, 'log_eval_one.txt')
     logger = create_logger(log_file)
     """
@@ -1189,6 +1194,41 @@ if __name__ == '__main__':
                                  classes=cfg.CLASSES,
                                  rcnn_training_roi_dir=None,
                                  rcnn_training_feature_dir=None,
-                                 gt_database_dir='tools/gt_database/train_gt_database_3level_Car.pkl')
+                                 gt_database_dir=None)
 
-    train_set[0]
+    batch = [train_set[0],train_set[1]]
+    from lib.net.generalized_point_rcnn import GeneralizedPointRCNN
+    model = GeneralizedPointRCNN(num_classes=2, use_xyz=True, mode='TRAIN').cuda()
+    import lib.net.train_functions_da as train_functions
+
+    batch_size = 2
+    ans_dict = {}
+
+    for key in batch[0].keys():
+        if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
+                (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
+            max_gt = 0
+            for k in range(batch_size):
+                max_gt = max(max_gt, batch[k][key].__len__())
+            batch_gt_boxes3d = np.zeros((batch_size, max_gt, 7), dtype=np.float32)
+            for i in range(batch_size):
+                batch_gt_boxes3d[i, :batch[i][key].__len__(), :] = batch[i][key]
+            ans_dict[key] = batch_gt_boxes3d
+            continue
+
+        if isinstance(batch[0][key], np.ndarray):
+            if batch_size == 1:
+                ans_dict[key] = batch[0][key][np.newaxis, ...]
+            else:
+                ans_dict[key] = np.concatenate([batch[k][key][np.newaxis, ...] for k in range(batch_size)], axis=0)
+
+        else:
+            ans_dict[key] = [batch[k][key] for k in range(batch_size)]
+            if isinstance(batch[0][key], int):
+                ans_dict[key] = np.array(ans_dict[key], dtype=np.int32)
+            elif isinstance(batch[0][key], float):
+                ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
+    input_data = ans_dict
+
+    # PointRCNN
+    loss, tb_dict, disp_dict = train_functions.model_joint_fn_decorator()(model, input_data)

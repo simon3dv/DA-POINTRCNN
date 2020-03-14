@@ -493,7 +493,14 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
 
         # model inference
         ret_dict = model(input_data)
-
+        ###dict_keys(
+        """###
+        'rpn_cls', [B, M, 7]
+        'rpn_reg', [B, N, 1]
+        'backbone_xyz', [B, N, 52]
+        'backbone_features', [B, N, 3]
+        'rois', 'roi_scores_raw', 'seg_result', 'rcnn_cls', 'rcnn_reg'])
+        """
         roi_scores_raw = ret_dict['roi_scores_raw']  # (B, M)
         roi_boxes3d = ret_dict['rois']  # (B, M, 7)
         seg_result = ret_dict['seg_result'].long()  # (B, N)
@@ -514,7 +521,7 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
                                           get_xz_fine=True, get_y_by_bin=cfg.RCNN.LOC_Y_BY_BIN,
                                           loc_y_scope=cfg.RCNN.LOC_Y_SCOPE, loc_y_bin_size=cfg.RCNN.LOC_Y_BIN_SIZE,
                                           get_ry_fine=True).view(batch_size, -1, 7)
-        ipdb.set_trace()
+
         # scoring
         if rcnn_cls.shape[2] == 1:
             raw_scores = rcnn_cls  # (B, M, 1)

@@ -33,7 +33,7 @@ parser.add_argument('--mgpus', action='store_true', default=False, help='whether
 parser.add_argument("--ckpt", type=str, default=None, help="continue training from this checkpoint")
 parser.add_argument("--rpn_ckpt", type=str, default=None, help="specify the well-trained rpn checkpoint")
 
-parser.add_argument("--gt_database", type=str, default='gt_database/train_gt_database_3level_Car.pkl',
+parser.add_argument("--gt_database", type=str, default=None,#'gt_database/train_gt_database_3level_Car.pkl'
                     help='generated gt database for augmentation')
 parser.add_argument("--rcnn_training_roi_dir", type=str, default=None,
                     help='specify the saved rois for rcnn training when using rcnn_offline mode')
@@ -228,12 +228,12 @@ if __name__ == "__main__":
     os.makedirs(ckpt_dir, exist_ok=True)
     trainer = train_utils.Trainer(
         model,
-        train_functions.model_joint_fn_decorator(),
+        train_functions_da.model_joint_fn_decorator(),
         optimizer,
         ckpt_dir=ckpt_dir,
         lr_scheduler=lr_scheduler,
         bnm_scheduler=bnm_scheduler,
-        model_fn_eval=train_functions.model_joint_fn_decorator(),
+        model_fn_eval=train_functions_da.model_joint_fn_decorator(),
         tb_log=tb_log,
         eval_frequency=1,
         lr_warmup_scheduler=lr_warmup_scheduler,

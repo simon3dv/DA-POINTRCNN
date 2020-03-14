@@ -4,14 +4,14 @@ import torch.utils.data as torch_data
 import lib.utils.nuscenes_calibration as calibration
 import lib.utils.kitti_utils as kitti_utils
 from PIL import Image
-
+import ipdb
 
 class nuscenes2KittiDataset(torch_data.Dataset):
-    def __init__(self, root_dir, split='train', sensor='CAM_FRONT'):
+    def __init__(self, root_dir, split='v1.0-trainval', sensor='CAM_FRONT'):
         self.split = split
         is_test = self.split == 'test'
         img_sets = split
-        self.imageset_dir = os.path.join(root_dir, 'nuScenes2KITTI', split)
+        self.imageset_dir = os.path.join(root_dir, 'nuScenes2KITTI', 'v1.0-test' if is_test else 'v1.0-trainval')
 
         split_dir = os.path.join(root_dir, 'nuScenes2KITTI', 'ImageSets', split + '.txt')
         self.image_idx_list = [x.strip() for x in open(split_dir).readlines()]
@@ -22,7 +22,6 @@ class nuscenes2KittiDataset(torch_data.Dataset):
         self.calib_dir = os.path.join(self.imageset_dir, 'calib')
         self.label_dir = os.path.join(self.imageset_dir, 'label_' + sensor)
         self.plane_dir = os.path.join(self.imageset_dir, 'planes')
-
     def get_image(self, idx):
         assert False, 'DO NOT USE cv2 NOW, AVOID DEADLOCK'
         import cv2

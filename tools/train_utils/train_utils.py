@@ -6,7 +6,7 @@ from torch.nn.utils import clip_grad_norm_
 import tqdm
 import torch.optim.lr_scheduler as lr_sched
 import math
-
+import numpy as np
 
 logging.getLogger(__name__).addHandler(logging.StreamHandler())
 cur_logger = logging.getLogger(__name__)
@@ -167,13 +167,48 @@ class Trainer(object):
 
         return total_loss / count, eval_dict, cur_performance
 
-    def train(self, start_it, start_epoch, n_epochs, train_loader, test_loader=None, ckpt_save_interval=5,
+    """
+    def collate_batch(self, cfg, batch):
+        batch_size = batch.__len__()
+        ans_dict = {}
+        import ipdb
+        ipdb.set_trace()
+
+        for key in batch[0].keys():
+            if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
+                    (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
+                max_gt = 0
+                for k in range(batch_size):
+                    max_gt = max(max_gt, batch[k][key].__len__())
+                batch_gt_boxes3d = np.zeros((batch_size, max_gt, 7), dtype=np.float32)
+                for i in range(batch_size):
+                    batch_gt_boxes3d[i, :batch[i][key].__len__(), :] = batch[i][key]
+                ans_dict[key] = batch_gt_boxes3d
+                continue
+
+            if isinstance(batch[0][key], np.ndarray):
+                if batch_size == 1:
+                    ans_dict[key] = batch[0][key][np.newaxis, ...]
+                else:
+                    ans_dict[key] = np.concatenate([batch[k][key][np.newaxis, ...] for k in range(batch_size)], axis=0)
+
+            else:
+                ans_dict[key] = [batch[k][key] for k in range(batch_size)]
+                if isinstance(batch[0][key], int):
+                    ans_dict[key] = np.array(ans_dict[key], dtype=np.int32)
+                elif isinstance(batch[0][key], float):
+                    ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
+
+        return ans_dict
+    """
+    def train(self, cfg, start_it, start_epoch, n_epochs, source_train_loader, source_test_loader,
+              target_train_loader, target_test_loader, ckpt_save_interval=5,
               lr_scheduler_each_iter=False):
         eval_frequency = self.eval_frequency if self.eval_frequency > 0 else 1
 
         it = start_it
         with tqdm.trange(start_epoch, n_epochs, desc='epochs') as tbar, \
-                tqdm.tqdm(total=len(train_loader), leave=False, desc='train') as pbar:
+                tqdm.tqdm(total=len(source_train_loader), leave=False, desc='train') as pbar:
 
             for epoch in tbar:
                 if self.lr_scheduler is not None and self.warmup_epoch <= epoch and (not lr_scheduler_each_iter):
@@ -184,7 +219,30 @@ class Trainer(object):
                     self.tb_log.add_scalar('bn_momentum', self.bnm_scheduler.lmbd(epoch), it)
 
                 # train one epoch
-                for cur_it, batch in enumerate(train_loader):
+                for cur_it, (source_batch, target_batch) in enumerate(zip(source_train_loader, target_train_loader)):
+
+                    batch = [source_batch, target_batch]
+                    import ipdb
+                    batch = {}
+                    for key, value in source_batch.items():
+                        if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
+                                (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
+                            max_gt = 0
+                            batch_size = value.shape[0]
+                            for k in range(batch_size):
+                                max_gt = max(max_gt, source_batch[key][k].__len__())
+                                max_gt = max(max_gt, target_batch[key][k].__len__())
+                            batch_gt_boxes3d = np.zeros((batch_size*2, max_gt, 7), dtype=np.float32)
+                            for i in range(batch_size):
+                                batch_gt_boxes3d[i, :source_batch[key][i].__len__(), :] = source_batch[key][i]
+                            for i in range(batch_size,batch_size*2):
+                                batch_gt_boxes3d[i, :target_batch[key][i-batch_size].__len__(), :] = target_batch[key][i-batch_size]
+                            batch[key] = batch_gt_boxes3d
+                        elif type(value) == np.ndarray:
+                            batch[key] = np.concatenate([source_batch[key], target_batch[key]], 0)
+                        elif type(value) == list:
+                            batch[key] = source_batch[key] + target_batch[key]
+
                     if lr_scheduler_each_iter:
                         self.lr_scheduler.step(it)
                         cur_lr = float(self.optimizer.lr)

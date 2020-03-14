@@ -8,7 +8,7 @@ AUG_METHOD_LIST: ['rotation', 'scaling', 'flip']
 AUG_METHOD_PROB: [1.0, 1.0, 0.5]
 AUG_ROT_RANGE: 18
 
-GT_AUG_ENABLED: True
+GT_AUG_ENABLED: False
 GT_EXTRA_NUM: 15
 GT_AUG_RAND_NUM: True
 GT_AUG_APPLY_PROB: 1.0
@@ -17,7 +17,6 @@ GT_AUG_HARD_RATIO: 0.6
 PC_REDUCE_BY_RANGE: True
 PC_AREA_SCOPE: [[-40, 40], [-1,   3], [0, 70.4]]  # x, y, z scope in rect camera coords
 CLS_MEAN_SIZE: [[1.52563191462, 1.62856739989, 3.88311640418]]
-
 
 # 1. config of rpn network
 RPN:
@@ -124,6 +123,17 @@ RCNN:
     # config of testing
     SCORE_THRESH: 0.3
     NMS_THRESH: 0.1
+
+
+# 3.Domain Adaptation Network
+DA:
+    ENABLED: True
+    SOURCE:
+        SPLIT: train
+        VAL_SPLIT: val
+    TARGET:
+        SPLIT: v1.0-train
+        VAL_SPLIT: v1.0-val
 
 # general training config
 TRAIN:

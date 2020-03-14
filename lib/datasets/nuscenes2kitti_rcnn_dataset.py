@@ -10,10 +10,10 @@ from lib.config import cfg
 
 id_max = 34150
 
-class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
+class Nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
                  logger=None, rcnn_training_roi_dir=None, rcnn_training_feature_dir=None, rcnn_eval_roi_dir=None,
-                 rcnn_eval_feature_dir=None, gt_database_dir=None, sensor='CAM_FRONT'):
+                 rcnn_eval_feature_dir=None, gt_database_dir=None, sensor='CAM_FRONT', is_source=False):
         super().__init__(root_dir=root_dir, split=split)
         self.sensor = sensor
         if classes == 'Car':
@@ -98,6 +98,7 @@ class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
 
             print('Done: filter %s results for rcnn training: %d / %d\n' %
                   (self.mode, len(self.sample_id_list), len(self.image_idx_list)))
+        self.is_source = is_source
 
     def preprocess_rpn_training_data(self):
         """
@@ -365,6 +366,7 @@ class nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
         sample_info['rpn_cls_label'] = rpn_cls_label
         sample_info['rpn_reg_label'] = rpn_reg_label
         sample_info['gt_boxes3d'] = aug_gt_boxes3d
+        sample_info['is_source'] = True if self.is_source else False
         return sample_info
 
     @staticmethod
