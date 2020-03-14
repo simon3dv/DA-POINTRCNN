@@ -54,6 +54,7 @@ def model_joint_fn_decorator():
             da_img, is_source = ret_dict['da_img'], data['is_source']
             da_rpn_loss = get_da_rpn_loss(da_img, is_source, tb_dict)
             loss += da_rpn_loss*1.0 # DA_IMG_LOSS_WEIGHT
+            disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
         disp_dict['loss'] = loss.item()
 
         return ModelReturn(loss, tb_dict, disp_dict)

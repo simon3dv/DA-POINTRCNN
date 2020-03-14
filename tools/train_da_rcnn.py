@@ -115,7 +115,6 @@ def create_dataloader(logger):
         target_test_loader = None
     return source_train_loader, target_train_loader, source_test_loader, target_test_loader
 
-
 def create_optimizer(model):
 
     if cfg.TRAIN.OPTIMIZER == 'adam':

@@ -292,7 +292,7 @@ class Trainer(object):
                                 self.tb_log.add_scalar('target_val_' + key, val, it)
 
                 pbar.close()
-                pbar = tqdm.tqdm(total=len(train_loader), leave=False, desc='train')
+                pbar = tqdm.tqdm(total=len(source_train_loader), leave=False, desc='train')
                 pbar.set_postfix(dict(total_it=it))
 
         return None
