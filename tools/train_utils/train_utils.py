@@ -140,7 +140,7 @@ class Trainer(object):
     def eval_epoch(self, d_loader):
         self.model.eval()
 
-        eval_dict = {}
+        target_eval_dict = {}
         total_loss = count = 0.0
 
         # eval one epoch
@@ -152,20 +152,20 @@ class Trainer(object):
             total_loss += loss.item()
             count += 1
             for k, v in tb_dict.items():
-                eval_dict[k] = eval_dict.get(k, 0) + v
+                target_eval_dict[k] = target_eval_dict.get(k, 0) + v
 
         # statistics this epoch
-        for k, v in eval_dict.items():
-            eval_dict[k] = eval_dict[k] / max(count, 1)
+        for k, v in target_eval_dict.items():
+            target_eval_dict[k] = target_eval_dict[k] / max(count, 1)
 
         cur_performance = 0
-        if 'recalled_cnt' in eval_dict:
-            eval_dict['recall'] = eval_dict['recalled_cnt'] / max(eval_dict['gt_cnt'], 1)
-            cur_performance = eval_dict['recall']
-        elif 'iou' in eval_dict:
-            cur_performance = eval_dict['iou']
+        if 'recalled_cnt' in target_eval_dict:
+            target_eval_dict['recall'] = target_eval_dict['recalled_cnt'] / max(target_eval_dict['gt_cnt'], 1)
+            cur_performance = target_eval_dict['recall']
+        elif 'iou' in target_eval_dict:
+            cur_performance = target_eval_dict['iou']
 
-        return total_loss / count, eval_dict, cur_performance
+        return total_loss / count, target_eval_dict, cur_performance
 
     """
     def collate_batch(self, cfg, batch):
@@ -282,14 +282,14 @@ class Trainer(object):
                 # eval one epoch
                 if (epoch % eval_frequency) == 0:
                     pbar.close()
-                    if test_loader is not None:
+                    if target_test_loader is not None:
                         with torch.set_grad_enabled(False):
-                            val_loss, eval_dict, cur_performance = self.eval_epoch(test_loader)
+                            target_val_loss, target_eval_dict, cur_performance = self.eval_epoch(target_test_loader)
 
                         if self.tb_log is not None:
-                            self.tb_log.add_scalar('val_loss', val_loss, it)
-                            for key, val in eval_dict.items():
-                                self.tb_log.add_scalar('val_' + key, val, it)
+                            self.tb_log.add_scalar('target_val_loss', target_val_loss, it)
+                            for key, val in target_eval_dict.items():
+                                self.tb_log.add_scalar('target_val_' + key, val, it)
 
                 pbar.close()
                 pbar = tqdm.tqdm(total=len(train_loader), leave=False, desc='train')
