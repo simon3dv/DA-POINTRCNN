@@ -55,7 +55,7 @@ def model_joint_fn_decorator():
             loss += rcnn_loss
 
 
-        if cfg.DA.ENABLED:
+        if cfg.DA.ENABLED and cfg.RPN.ENABLED and not cfg.RPN.FIXED:
             da_img, is_source = ret_dict['da_img'], data['is_source']
             da_rpn_loss = get_da_rpn_loss(da_img, is_source, tb_dict)
             loss += da_rpn_loss*1.0 # DA_IMG_LOSS_WEIGHT
