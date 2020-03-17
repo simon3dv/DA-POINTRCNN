@@ -265,7 +265,7 @@ if __name__ == "__main__":
         bnm_scheduler=bnm_scheduler,
         model_fn_eval=train_functions.model_joint_fn_decorator(),
         tb_log=tb_log,
-        eval_frequency=1,
+        eval_frequency=10,
         lr_warmup_scheduler=lr_warmup_scheduler,
         warmup_epoch=cfg.TRAIN.WARMUP_EPOCH,
         grad_norm_clip=cfg.TRAIN.GRAD_NORM_CLIP
