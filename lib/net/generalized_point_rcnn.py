@@ -201,6 +201,11 @@ class GeneralizedPointRCNN(nn.Module):
                     self.rpn.eval()
                 rpn_output = self.rpn(input_data)
                 output.update(rpn_output)
+                if cfg.DA.ENABLED and cfg.DA.DA_IMG.ENABLED:
+                    if cfg.RPN.FIXED:
+                        self.da_rpn.eval()
+                    da_rpn_output = self.da_rpn(rpn_output['backbone_features'])
+                    output.update(da_rpn_output)
             """
             rpn_output:
             rpn_cls: B,N,1
@@ -235,13 +240,12 @@ class GeneralizedPointRCNN(nn.Module):
 
                 rcnn_output = self.rcnn_net(rcnn_input_info)
                 output.update(rcnn_output)
-                if cfg.DA.ENABLED:
+
+                if cfg.DA.ENABLED and cfg.DA.DA_INS.ENABLED and self.training:
                     da_rcnn_output = self.da_rcnn(output['l_features']) # l_features: [B*64, 512, 133]
                     output.update(da_rcnn_output)
 
-            if cfg.DA.ENABLED:
-                da_rpn_output = self.da_rpn(rpn_output['backbone_features'])
-                output.update(da_rpn_output)
+
         elif cfg.RCNN.ENABLED:
             output = self.rcnn_net(input_data)
             ipdb.set_trace()
