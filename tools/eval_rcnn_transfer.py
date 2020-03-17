@@ -749,7 +749,7 @@ def eval_single_ckpt(root_result_dir):
 
     # create dataloader & network
     source_test_loader, target_test_loader = create_dataloader_da(logger)
-    model = GeneralizedPointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
+    model = GeneralizedPointRCNN(num_classes=source_test_loader.dataset.num_class, use_xyz=True, mode='TEST')
     model.cuda()
 
     # copy important files to backup
@@ -763,8 +763,8 @@ def eval_single_ckpt(root_result_dir):
     load_ckpt_based_on_args(model, logger)
 
     # start evaluation
-    eval_one_epoch(model, source_test_loader, epoch_id, root_result_dir + '/source', logger)
-    eval_one_epoch(model, target_test_loader, epoch_id, root_result_dir + '/target', logger)
+    eval_one_epoch(model, source_test_loader, epoch_id, os.path.join(root_result_dir , 'source'), logger)
+    eval_one_epoch(model, target_test_loader, epoch_id, os.path.join(root_result_dir , 'target'), logger)
 
 def get_no_evaluated_ckpt(ckpt_dir, ckpt_record_file):
     ckpt_list = glob.glob(os.path.join(ckpt_dir, '*checkpoint_epoch_*.pth'))
@@ -796,8 +796,8 @@ def repeat_eval_ckpt(root_result_dir, ckpt_dir):
     save_config_to_file(cfg, logger=logger)
 
     # create dataloader & network
-    test_loader = create_dataloader(logger)
-    model = GeneralizedPointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
+    source_test_loader, target_test_loader = create_dataloader_da(logger)
+    model = GeneralizedPointRCNN(num_classes=source_test_loader.dataset.num_class, use_xyz=True, mode='TEST')
     model.cuda()
 
     # copy important files to backup
@@ -828,8 +828,34 @@ def repeat_eval_ckpt(root_result_dir, ckpt_dir):
         train_utils.load_checkpoint(model, filename=cur_ckpt)
 
         # start evaluation
-        cur_result_dir = os.path.join(root_result_dir, 'epoch_%s' % cur_epoch_id, cfg.TEST.SPLIT)
-        tb_dict = eval_one_epoch(model, test_loader, cur_epoch_id, cur_result_dir, logger)
+        cur_result_dir = os.path.join(root_result_dir,'source', 'epoch_%s' % cur_epoch_id, cfg.TEST.SPLIT)
+        tb_dict = eval_one_epoch(model, source_test_loader, cur_epoch_id, cur_result_dir, logger)
+
+        step = int(float(cur_epoch_id))
+        if step == float(cur_epoch_id):
+            for key, val in tb_dict.items():
+                tb_log.add_scalar(key, val, step)
+
+        # record this epoch which has been evaluated
+        with open(ckpt_record_file, 'a') as f:
+            print('%s' % cur_epoch_id, file=f)
+        logger.info('Epoch %s has been evaluated' % cur_epoch_id)
+
+    while True:
+        # check whether there is checkpoint which is not evaluated
+        cur_epoch_id, cur_ckpt = get_no_evaluated_ckpt(ckpt_dir, ckpt_record_file)
+        if cur_epoch_id == -1 or int(float(cur_epoch_id)) < args.start_epoch:
+            wait_second = 30
+            print('Wait %s second for next check: %s' % (wait_second, ckpt_dir))
+            time.sleep(wait_second)
+            continue
+
+        # load checkpoint
+        train_utils.load_checkpoint(model, filename=cur_ckpt)
+
+        # start evaluation
+        cur_result_dir = os.path.join(root_result_dir,'target', 'epoch_%s' % cur_epoch_id, cfg.TEST.SPLIT)
+        tb_dict = eval_one_epoch(model, source_test_loader, cur_epoch_id, cur_result_dir, logger)
 
         step = int(float(cur_epoch_id))
         if step == float(cur_epoch_id):
