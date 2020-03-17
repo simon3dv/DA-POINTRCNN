@@ -755,7 +755,7 @@ def eval_single_ckpt(root_result_dir, loader, is_source, logger):
     load_ckpt_based_on_args(model, logger)
 
     # start evaluation
-    eval_one_epoch(model, source_test_loader, epoch_id, os.path.join(root_result_dir , 'source' if is_source else 'target'), logger)
+    eval_one_epoch(model, loader, epoch_id, os.path.join(root_result_dir , 'source' if is_source else 'target'), logger)
 
 def get_no_evaluated_ckpt(ckpt_dir, ckpt_record_file):
     ckpt_list = glob.glob(os.path.join(ckpt_dir, '*checkpoint_epoch_*.pth'))
