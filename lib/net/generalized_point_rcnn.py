@@ -37,8 +37,8 @@ class DAImgHead(nn.Module):
     def __init__(self, in_channels):
         super(DAImgHead, self).__init__()
 
-        self.conv1_da = nn.Conv1d(in_channels, 128, kernel_size=1, stride=1)
-        self.conv2_da = nn.Conv1d(128, 1, kernel_size=1, stride=1)
+        self.conv1_da = nn.Conv1d(in_channels, 512, kernel_size=1, stride=1)
+        self.conv2_da = nn.Conv1d(512, 1, kernel_size=1, stride=1)
 
         for l in [self.conv1_da, self.conv2_da]:
             torch.nn.init.normal_(l.weight, std=0.001)
