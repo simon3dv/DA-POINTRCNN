@@ -748,7 +748,7 @@ def eval_single_ckpt(root_result_dir):
     save_config_to_file(cfg, logger=logger)
 
     # create dataloader & network
-    test_loader = create_dataloader(logger)
+    source_test_loader, target_test_loader = create_dataloader_da(logger)
     model = GeneralizedPointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
     model.cuda()
 
@@ -763,8 +763,8 @@ def eval_single_ckpt(root_result_dir):
     load_ckpt_based_on_args(model, logger)
 
     # start evaluation
-    eval_one_epoch(model, test_loader, epoch_id, root_result_dir, logger)
-
+    eval_one_epoch(model, source_test_loader, epoch_id, root_result_dir + '/source', logger)
+    eval_one_epoch(model, target_test_loader, epoch_id, root_result_dir + '/target', logger)
 
 def get_no_evaluated_ckpt(ckpt_dir, ckpt_record_file):
     ckpt_list = glob.glob(os.path.join(ckpt_dir, '*checkpoint_epoch_*.pth'))
@@ -858,6 +858,34 @@ def create_dataloader(logger):
                              num_workers=args.workers, collate_fn=test_set.collate_batch)
 
     return test_loader
+
+def create_dataloader_da(logger):
+    mode = 'TEST' if args.test else 'EVAL'
+    DATA_PATH = os.path.join('../', 'data')
+
+
+    source_test_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS,
+                                    split=cfg.DA.SOURCE.VAL_SPLIT, mode=mode,
+                                    logger=logger,
+                                    classes=cfg.CLASSES,
+                                    rcnn_eval_roi_dir=args.rcnn_eval_roi_dir,
+                                    rcnn_eval_feature_dir=args.rcnn_eval_feature_dir,
+                                    is_source = True)
+    source_test_loader = DataLoader(source_test_set, batch_size=1, shuffle=True, pin_memory=True,
+                                 num_workers=args.workers, collate_fn=source_test_set.collate_batch)
+
+    if cfg.DA.ENABLED:
+        target_test_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS,
+                                               split=cfg.DA.TARGET.VAL_SPLIT, mode='EVAL',
+                                               logger=logger,
+                                               classes=cfg.CLASSES,
+                                               rcnn_eval_roi_dir=args.rcnn_eval_roi_dir,
+                                               rcnn_eval_feature_dir=args.rcnn_eval_feature_dir,
+                                               is_source = False)
+        target_test_loader = DataLoader(target_test_set, batch_size=1, shuffle=True, pin_memory=True,
+                                            num_workers=args.workers, collate_fn=target_test_set.collate_batch)
+
+    return source_test_loader, target_test_loader
 
 
 if __name__ == "__main__":
