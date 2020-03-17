@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
-from lib.net.point_rcnn import PointRCNN
+from lib.net.generalized_point_rcnn import GeneralizedPointRCNN
 from lib.datasets.kitti_rcnn_dataset import KittiRCNNDataset
 from lib.datasets.nuscenes2kitti_rcnn_dataset import nuscenes2kittiRCNNDataset
 import tools.train_utils.train_utils as train_utils
@@ -749,7 +749,7 @@ def eval_single_ckpt(root_result_dir):
 
     # create dataloader & network
     test_loader = create_dataloader(logger)
-    model = PointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
+    model = GeneralizedPointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
     model.cuda()
 
     # copy important files to backup
@@ -797,7 +797,7 @@ def repeat_eval_ckpt(root_result_dir, ckpt_dir):
 
     # create dataloader & network
     test_loader = create_dataloader(logger)
-    model = PointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
+    model = GeneralizedPointRCNN(num_classes=test_loader.dataset.num_class, use_xyz=True, mode='TEST')
     model.cuda()
 
     # copy important files to backup
