@@ -242,8 +242,6 @@ class Trainer(object):
                             batch[key] = np.concatenate([source_batch[key], target_batch[key]], 0)
                         elif type(value) == list:
                             batch[key] = source_batch[key] + target_batch[key]
-                        else:
-                            ipdb.set_trace()
 
                     if lr_scheduler_each_iter:
                         self.lr_scheduler.step(it)
