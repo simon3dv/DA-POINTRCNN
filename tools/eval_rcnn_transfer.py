@@ -953,6 +953,6 @@ if __name__ == "__main__":
                 logger.info("{:16} {}".format(key, val))
             save_config_to_file(cfg, logger=logger)
             source_test_loader, target_test_loader = create_dataloader_da(logger)
-            eval_single_ckpt(root_result_dir, source_test_loader, is_source=True, logger)
-            eval_single_ckpt(root_result_dir, target_test_loader, is_source=False, logger)
+            eval_single_ckpt(root_result_dir, source_test_loader, is_source=True, logger=logger)
+            eval_single_ckpt(root_result_dir, target_test_loader, is_source=False, logger=logger)
 
