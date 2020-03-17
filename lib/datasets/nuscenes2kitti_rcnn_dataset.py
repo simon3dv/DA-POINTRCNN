@@ -10,7 +10,7 @@ from lib.config import cfg
 
 id_max = 34150
 
-class nuscenes2kittiRCNNDataset(nuscenes2KittiDataset):
+class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
                  logger=None, rcnn_training_roi_dir=None, rcnn_training_feature_dir=None, rcnn_eval_roi_dir=None,
                  rcnn_eval_feature_dir=None, gt_database_dir=None, sensor='CAM_FRONT', is_source=False):
