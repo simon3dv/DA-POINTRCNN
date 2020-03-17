@@ -282,6 +282,15 @@ class Trainer(object):
                 # eval one epoch
                 if (epoch % eval_frequency) == 0:
                     pbar.close()
+                    if source_test_loader is not None:
+                        with torch.set_grad_enabled(False):
+                            source_val_loss, source_eval_dict, cur_performance = self.eval_epoch(source_test_loader)
+
+                        if self.tb_log is not None:
+                            self.tb_log.add_scalar('source_val_loss', source_val_loss, it)
+                            for key, val in source_eval_dict.items():
+                                self.tb_log.add_scalar('source_val_' + key, val, it)
+
                     if target_test_loader is not None:
                         with torch.set_grad_enabled(False):
                             target_val_loss, target_eval_dict, cur_performance = self.eval_epoch(target_test_loader)
