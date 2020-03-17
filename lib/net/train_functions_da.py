@@ -64,7 +64,6 @@ def model_joint_fn_decorator():
             rcnn_loss = get_rcnn_loss(model, ret_dict, tb_dict)
             disp_dict['reg_fg_sum'] = tb_dict['rcnn_reg_fg']
             loss += rcnn_loss
-            ipdb.set_trace()
 
 
         if cfg.DA.ENABLED and cfg.RPN.ENABLED and not cfg.RPN.FIXED:

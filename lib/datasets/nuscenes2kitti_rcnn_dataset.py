@@ -352,7 +352,7 @@ class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
             pts_input = aug_pts_rect
 
         sample_info['is_source'] = True if self.is_source else False
-        
+
         if cfg.RPN.FIXED:
             sample_info['pts_input'] = pts_input
             sample_info['pts_rect'] = aug_pts_rect
