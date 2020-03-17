@@ -70,8 +70,8 @@ def model_joint_fn_decorator():
                 if bs == domain_mask.shape[0]:
                     ret_dict[key] = ret_dict[key][domain_mask, ...]
                 else:
-                    ret_dict[key] = ret_dict[key][domain_mask_for_rois, ...]
                     ipdb.set_trace()
+                    ret_dict[key] = ret_dict[key][domain_mask_for_rois, ...]
 
             rcnn_loss = get_rcnn_loss(model, ret_dict, tb_dict)
             disp_dict['reg_fg_sum'] = tb_dict['rcnn_reg_fg']
