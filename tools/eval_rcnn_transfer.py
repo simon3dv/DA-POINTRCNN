@@ -750,6 +750,7 @@ def eval_single_ckpt(root_result_dir, loader, is_source, logger):
     os.system('cp *.py %s/' % backup_dir)
     os.system('cp ../lib/net/*.py %s/' % backup_dir)
     os.system('cp ../lib/datasets/kitti_rcnn_dataset.py %s/' % backup_dir)
+    os.system('cp ../lib/datasets/nuscenes2kitti_rcnn_dataset.py %s/' % backup_dir)
 
     # load checkpoint
     load_ckpt_based_on_args(model, logger)
