@@ -64,12 +64,14 @@ def model_joint_fn_decorator():
             n_roi = cfg.RCNN.ROI_PER_IMAGE
             is_source_for_rois = np.repeat(data['is_source'][:,np.newaxis],n_roi,axis=1).reshape(-1)
             domain_mask_for_rois = np.where(is_source_for_rois == True)[0]
+
             for key in ret_dict.keys():
                 bs = ret_dict[key].shape[0]
                 if bs == domain_mask.shape[0]:
                     ret_dict[key] = ret_dict[key][domain_mask, ...]
                 else:
                     ret_dict[key] = ret_dict[key][domain_mask_for_rois, ...]
+                    ipdb.set_trace()
 
             rcnn_loss = get_rcnn_loss(model, ret_dict, tb_dict)
             disp_dict['reg_fg_sum'] = tb_dict['rcnn_reg_fg']
