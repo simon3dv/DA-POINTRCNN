@@ -40,7 +40,13 @@ def model_joint_fn_decorator():
         loss = 0
 
         # Only caculate detection loss that is_source==True
-        domain_mask = np.where(data['is_source'] == True)[0]  # B,
+
+        if cfg.DA.ENABLED:
+            is_source = data['is_source']
+        else:
+            is_source = np.ones(ret_dict['backbone_xyz'].shape[0])
+        domain_mask = np.where(is_source == True)[0]  # B,
+
         if cfg.RPN.ENABLED and not cfg.RPN.FIXED:
             rpn_cls, rpn_reg = ret_dict['rpn_cls'], ret_dict['rpn_reg'] # B,N,1 B,N,76 (include source and target)
             rpn_cls = rpn_cls[domain_mask, ...] # B,N,1 (include source only, B is change)
