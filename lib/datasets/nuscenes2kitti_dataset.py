@@ -6,7 +6,7 @@ import lib.utils.kitti_utils as kitti_utils
 from PIL import Image
 import ipdb
 
-class nuscenes2KittiDataset(torch_data.Dataset):
+class nuscenes2kittiDataset(torch_data.Dataset):
     def __init__(self, root_dir, split='v1.0-trainval', sensor='CAM_FRONT'):
         self.split = split
         is_test = self.split == 'test'

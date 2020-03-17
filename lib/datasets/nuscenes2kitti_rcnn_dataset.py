@@ -3,14 +3,14 @@ import os
 import pickle
 import torch
 
-from lib.datasets.nuscenes2kitti_dataset import nuscenes2KittiDataset
+from lib.datasets.nuscenes2kitti_dataset import nuscenes2kittiDataset
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
 from lib.config import cfg
 
 id_max = 34150
 
-class Nuscenes2KittiRCNNDataset(nuscenes2KittiDataset):
+class nuscenes2kittiRCNNDataset(nuscenes2KittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
                  logger=None, rcnn_training_roi_dir=None, rcnn_training_feature_dir=None, rcnn_eval_roi_dir=None,
                  rcnn_eval_feature_dir=None, gt_database_dir=None, sensor='CAM_FRONT', is_source=False):
