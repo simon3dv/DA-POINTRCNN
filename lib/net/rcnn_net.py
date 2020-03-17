@@ -9,7 +9,7 @@ from lib.config import cfg
 
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
-
+import ipdb
 
 class RCNNNet(nn.Module):
     def __init__(self, num_classes, input_channels=0, use_xyz=True):
@@ -164,12 +164,12 @@ class RCNNNet(nn.Module):
         xyz, features = self._break_up_pc(pts_input) # (64, 512, 3), (64,130,512)
 
         if cfg.RCNN.USE_RPN_FEATURES:
-            xyz_input = pts_input[..., 0:self.rcnn_input_channel].transpose(1, 2).unsqueeze(dim=3)# (64, 5, 512, 1)
-            xyz_feature = self.xyz_up_layer(xyz_input)
+            xyz_input = pts_input[..., 0:self.rcnn_input_channel].transpose(1, 2).unsqueeze(dim=3) # (64, 5, 512, 1)
+            xyz_feature = self.xyz_up_layer(xyz_input) # [128, 128, 512, 1]
 
-            rpn_feature = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3)# (64, 128, 512, 1)
+            rpn_feature = pts_input[..., self.rcnn_input_channel:].transpose(1, 2).unsqueeze(dim=3) # (64, 128, 512, 1)
 
-            merged_feature = torch.cat((xyz_feature, rpn_feature), dim=1)
+            merged_feature = torch.cat((xyz_feature, rpn_feature), dim=1) # [128, 256, 512, 1]
             merged_feature = self.merge_down_layer(merged_feature) # (64, 128, 512, 1)
             l_xyz, l_features = [xyz], [merged_feature.squeeze(dim=3)]
         else:
@@ -179,10 +179,11 @@ class RCNNNet(nn.Module):
             li_xyz, li_features = self.SA_modules[i](l_xyz[i], l_features[i])
             l_xyz.append(li_xyz)
             l_features.append(li_features)
-
+        #l_features: [B*64, 128, 512] [B*64, 128, 128] [B*64, 256, 32] [B*64, 512, 1]
         rcnn_cls = self.cls_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, 1 or 2)
         rcnn_reg = self.reg_layer(l_features[-1]).transpose(1, 2).contiguous().squeeze(dim=1)  # (B, C)
         ret_dict = {'rcnn_cls': rcnn_cls, 'rcnn_reg': rcnn_reg}
         if self.training:
+            target_dict['l_features'] = l_features[-1] # For DA
             ret_dict.update(target_dict)
         return ret_dict

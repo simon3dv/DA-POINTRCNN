@@ -128,6 +128,17 @@ RCNN:
 # 3.Domain Adaptation Network
 DA:
     ENABLED: True
+    DA_IMG:
+        ENABLED: True
+        GRL_WEIGHT: 0.1
+        LOSS_WEIGHT: 1.0
+    DA_INS:
+        ENABLED: True
+        GRL_WEIGHT: 0.1
+        LOSS_WEIGHT: 1.0
+    DA_CST:
+        ENABLED: False
+        LOSS_WEIGHT: 1.0
     SOURCE:
         SPLIT: train
         VAL_SPLIT: val

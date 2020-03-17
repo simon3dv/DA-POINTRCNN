@@ -5,16 +5,16 @@ from lib.config import cfg
 import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
 import lib.utils.iou3d.iou3d_utils as iou3d_utils
-
+import ipdb
 
 class ProposalTargetLayer(nn.Module):
     def __init__(self):
         super().__init__()
 
     def forward(self, input_dict):
-        roi_boxes3d, gt_boxes3d = input_dict['roi_boxes3d'], input_dict['gt_boxes3d']
+        roi_boxes3d, gt_boxes3d = input_dict['roi_boxes3d'], input_dict['gt_boxes3d'] # B,512,7 B,n,7
 
-        batch_rois, batch_gt_of_rois, batch_roi_iou = self.sample_rois_for_rcnn(roi_boxes3d, gt_boxes3d)
+        batch_rois, batch_gt_of_rois, batch_roi_iou = self.sample_rois_for_rcnn(roi_boxes3d, gt_boxes3d) # B,64,7 B,64,7 B,64
 
         rpn_xyz, rpn_features = input_dict['rpn_xyz'], input_dict['rpn_features']
         if cfg.RCNN.USE_INTENSITY:
@@ -26,13 +26,13 @@ class ProposalTargetLayer(nn.Module):
         if cfg.RCNN.USE_DEPTH:
             pts_depth = input_dict['pts_depth'] / 70.0 - 0.5
             pts_extra_input_list.append(pts_depth.unsqueeze(dim=2))
-        pts_extra_input = torch.cat(pts_extra_input_list, dim=2)
+        pts_extra_input = torch.cat(pts_extra_input_list, dim=2) # B,N,2
 
         # point cloud pooling
-        pts_feature = torch.cat((pts_extra_input, rpn_features), dim=2)
+        pts_feature = torch.cat((pts_extra_input, rpn_features), dim=2) # B,N,130
         pooled_features, pooled_empty_flag = \
             roipool3d_utils.roipool3d_gpu(rpn_xyz, pts_feature, batch_rois, cfg.RCNN.POOL_EXTRA_WIDTH,
-                                          sampled_pt_num=cfg.RCNN.NUM_POINTS)
+                                          sampled_pt_num=cfg.RCNN.NUM_POINTS) # [B, 64, 512, 133], [B, 64]
 
         sampled_pts, sampled_features = pooled_features[:, :, :, 0:3], pooled_features[:, :, :, 3:]
 
@@ -64,14 +64,13 @@ class ProposalTargetLayer(nn.Module):
         invalid_mask = (batch_roi_iou > cfg.RCNN.CLS_BG_THRESH) & (batch_roi_iou < cfg.RCNN.CLS_FG_THRESH)
         batch_cls_label[valid_mask == 0] = -1
         batch_cls_label[invalid_mask > 0] = -1
-        output_dict = {'sampled_pts': sampled_pts.view(-1, cfg.RCNN.NUM_POINTS, 3),
-                       'pts_feature': sampled_features.view(-1, cfg.RCNN.NUM_POINTS, sampled_features.shape[3]),
-                       'cls_label': batch_cls_label.view(-1),
-                       'reg_valid_mask': reg_valid_mask.view(-1),
-                       'gt_of_rois': batch_gt_of_rois.view(-1, 7),
-                       'gt_iou': batch_roi_iou.view(-1),
-                       'roi_boxes3d': batch_rois.view(-1, 7)}
-
+        output_dict = {'sampled_pts': sampled_pts.view(-1, cfg.RCNN.NUM_POINTS, 3),# 128,512,3
+                       'pts_feature': sampled_features.view(-1, cfg.RCNN.NUM_POINTS, sampled_features.shape[3]),# 128,512,130
+                       'cls_label': batch_cls_label.view(-1), # 128,
+                       'reg_valid_mask': reg_valid_mask.view(-1), # 128,
+                       'gt_of_rois': batch_gt_of_rois.view(-1, 7), # 128,7
+                       'gt_iou': batch_roi_iou.view(-1), # 128,
+                       'roi_boxes3d': batch_rois.view(-1, 7)} # 128,7
         return output_dict
 
     def sample_rois_for_rcnn(self, roi_boxes3d, gt_boxes3d):

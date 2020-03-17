@@ -37,8 +37,8 @@ class DAImgHead(nn.Module):
     def __init__(self, in_channels):
         super(DAImgHead, self).__init__()
 
-        self.conv1_da = nn.Conv1d(in_channels, 512, kernel_size=1, stride=1)
-        self.conv2_da = nn.Conv1d(512, 1, kernel_size=1, stride=1)
+        self.conv1_da = nn.Conv1d(in_channels, 128, kernel_size=1, stride=1)
+        self.conv2_da = nn.Conv1d(128, 1, kernel_size=1, stride=1)
 
         for l in [self.conv1_da, self.conv2_da]:
             torch.nn.init.normal_(l.weight, std=0.001)
@@ -48,6 +48,24 @@ class DAImgHead(nn.Module):
         t = F.relu(self.conv1_da(x))
         img_features = self.conv2_da(t) #B, 1, N
         return img_features
+
+class DAInsHead(nn.Module):
+    def __init__(self, in_channels):
+        super(DAInsHead, self).__init__()
+
+        self.conv1_da = nn.Conv1d(in_channels, 256, kernel_size=1, stride=1)
+        self.conv2_da = nn.Conv1d(256, 256, kernel_size=1, stride=1)
+        self.conv3_da = nn.Conv1d(256, 1, kernel_size=1, stride=1)
+
+        for l in [self.conv1_da, self.conv2_da, self.conv3_da]:
+            torch.nn.init.normal_(l.weight, std=0.001)
+            torch.nn.init.constant_(l.bias, 0)
+
+    def forward(self, x):
+        t = F.relu(self.conv1_da(x))
+        t = F.relu(self.conv2_da(t))
+        ins_features = self.conv3_da(t)
+        return ins_features
 
 class da_rpn(torch.nn.Module):
     def __init__(self, cfg):
@@ -115,6 +133,44 @@ class da_rpn(torch.nn.Module):
         output = {'da_img': da_img_features}
         return output
 
+class da_rcnn(torch.nn.Module):
+    def __init__(self, cfg):
+        super(da_rcnn, self).__init__()
+
+        self.cfg = cfg
+        self.ins_weight = 1.0#cfg.MODEL.DA_HEADS.DA_INS_LOSS_WEIGHT
+
+        self.grl_ins = GradientScalarLayer(-1.0 * 0.1)
+
+        num_ins_inputs = 512
+
+        self.inshead = DAInsHead(num_ins_inputs)
+
+    def forward(self, ins_features):
+        """
+        Arguments:
+            ins_features : B*64, 512, 1
+
+        Returns:
+            losses (dict[Tensor]): the losses for the model during training. During
+                testing, it is an empty dict.
+        """
+        ins_grl_fea = self.grl_ins(ins_features) #(B*64,512,1)
+        da_ins_features = self.inshead(ins_grl_fea) #[128, 1, 1]
+        """
+        if self.training:
+            da_img_loss = F.binary_cross_entropy_with_logits(
+                da_img_features, da_img_labels
+            )
+            losses = {}
+            if self.img_weight > 0:
+                losses["loss_da_image"] = self.img_weight * da_img_loss
+            return losses
+        return {}
+        """
+        output = {'da_ins': da_ins_features}
+        return output
+
 class GeneralizedPointRCNN(nn.Module):
     def __init__(self, num_classes, use_xyz=True, mode='TRAIN'):
         super().__init__()
@@ -135,6 +191,7 @@ class GeneralizedPointRCNN(nn.Module):
 
         if cfg.DA.ENABLED:
             self.da_rpn = da_rpn(cfg)
+            self.da_rcnn = da_rcnn(cfg)
     def forward(self, input_data):
         if cfg.RPN.ENABLED:
             output = {}
@@ -144,7 +201,13 @@ class GeneralizedPointRCNN(nn.Module):
                     self.rpn.eval()
                 rpn_output = self.rpn(input_data)
                 output.update(rpn_output)
-
+            """
+            rpn_output:
+            rpn_cls: B,N,1
+            rpn_reg: B,N,76
+            backbone_xyz B,N,3
+            backbone_features: B,128,N
+            """
             # rcnn inference
             if cfg.RCNN.ENABLED:
                 with torch.no_grad():
@@ -172,13 +235,16 @@ class GeneralizedPointRCNN(nn.Module):
 
                 rcnn_output = self.rcnn_net(rcnn_input_info)
                 output.update(rcnn_output)
+                if cfg.DA.ENABLED:
+                    da_rcnn_output = self.da_rcnn(output['l_features']) # l_features: [B*64, 512, 133]
+                    output.update(da_rcnn_output)
 
             if cfg.DA.ENABLED:
                 da_rpn_output = self.da_rpn(rpn_output['backbone_features'])
                 output.update(da_rpn_output)
-
         elif cfg.RCNN.ENABLED:
             output = self.rcnn_net(input_data)
+            ipdb.set_trace()
         else:
             raise NotImplementedError
 

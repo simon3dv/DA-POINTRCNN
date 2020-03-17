@@ -49,33 +49,54 @@ def model_joint_fn_decorator():
 
         if cfg.RPN.ENABLED and not cfg.RPN.FIXED:
             rpn_cls, rpn_reg = ret_dict['rpn_cls'], ret_dict['rpn_reg'] # B,N,1 B,N,76 (include source and target)
+
             rpn_cls = rpn_cls[domain_mask, ...] # B,N,1 (include source only, B is change)
             rpn_reg = rpn_reg[domain_mask, ...]
             rpn_cls_label = rpn_cls_label[domain_mask, ...]
             rpn_reg_label = rpn_reg_label[domain_mask, ...]
+
             rpn_loss = get_rpn_loss(model, rpn_cls, rpn_reg, rpn_cls_label, rpn_reg_label, tb_dict)
             loss += rpn_loss
             disp_dict['rpn_loss'] = rpn_loss.item()
 
         if cfg.RCNN.ENABLED:
+
+            n_roi = cfg.RCNN.ROI_PER_IMAGE
+            is_source_for_rois = np.repeat(data['is_source'][:,np.newaxis],n_roi,axis=1).reshape(-1)
+            domain_mask_for_rois = np.where(is_source_for_rois == True)[0]
             for key in ret_dict.keys():
-                ret_dict[key] = ret_dict[key][domain_mask, ...]
+                bs = ret_dict[key].shape[0]
+                if bs == domain_mask.shape[0]:
+                    ret_dict[key] = ret_dict[key][domain_mask, ...]
+                else:
+                    ret_dict[key] = ret_dict[key][domain_mask_for_rois, ...]
 
             rcnn_loss = get_rcnn_loss(model, ret_dict, tb_dict)
             disp_dict['reg_fg_sum'] = tb_dict['rcnn_reg_fg']
             loss += rcnn_loss
 
 
-        if cfg.DA.ENABLED and cfg.RPN.ENABLED and not cfg.RPN.FIXED:
-            da_img, is_source = ret_dict['da_img'], data['is_source']
-            da_rpn_loss = get_da_rpn_loss(da_img, is_source, tb_dict)
-            loss += da_rpn_loss*1.0 # DA_IMG_LOSS_WEIGHT
-            disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
+        if cfg.DA.ENABLED:
+            if cfg.RPN.ENABLED and not cfg.RPN.FIXED and cfg.DA.DA_IMG.ENABLED:
+                da_img, is_source = ret_dict['da_img'], data['is_source']
+                da_rpn_loss = get_da_rpn_loss(da_img, is_source, tb_dict)
+                loss += da_rpn_loss*1.0 # DA_IMG_LOSS_WEIGHT
+                disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
+            if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
+                da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict)
+                loss += da_rcnn_loss * 1.0  # DA_INS_LOSS_WEIGHT
+                disp_dict['da_rcnn_loss'] = da_rcnn_loss * 1.0
+            if cfg.DA.DA_CST.ENABLED:
+                pass
         disp_dict['loss'] = loss.item()
 
         return ModelReturn(loss, tb_dict, disp_dict)
 
     def get_da_rpn_loss(da_img, is_source, tb_dict):
+        """
+        :param da_img: B,1,N
+        :param is_source: B,
+        """
         da_img = da_img.squeeze() # B, N
         da_img_labels = torch.zeros(da_img.shape).cuda()
         mask = np.where(is_source)[0]
@@ -84,6 +105,18 @@ def model_joint_fn_decorator():
         tb_dict['da_rpn_loss'] = da_rpn_loss.item()
         tb_dict.update({'da_rpn_loss': da_rpn_loss.item()})
         return da_rpn_loss
+
+    def get_da_rcnn_loss(da_ins, is_source_for_rois, tb_dict):
+        """
+        :param da_ins:B*n_rois, 1, 1
+        :param is_source_for_rois: B*n_rois,
+        """
+        da_ins = da_ins.squeeze() # B,
+        da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
+        da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
+        tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
+        tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
+        return da_rcnn_loss
 
     def get_rpn_loss(model, rpn_cls, rpn_reg, rpn_cls_label, rpn_reg_label, tb_dict):
         if isinstance(model, nn.DataParallel):
