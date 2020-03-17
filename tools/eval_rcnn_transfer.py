@@ -727,7 +727,7 @@ def load_ckpt_based_on_args(model, logger):
         load_part_ckpt(model, filename=args.rcnn_ckpt, logger=logger, total_keys=total_keys)
 
 
-def eval_single_ckpt(root_result_dir, loader, is_source):
+def eval_single_ckpt(root_result_dir, loader, is_source, logger):
     root_result_dir = os.path.join(root_result_dir, 'eval')
     # set epoch_id and output dir
     num_list = re.findall(r'\d+', args.ckpt) if args.ckpt is not None else []
@@ -740,14 +740,6 @@ def eval_single_ckpt(root_result_dir, loader, is_source):
     if args.extra_tag != 'default':
         root_result_dir = os.path.join(root_result_dir, args.extra_tag)
     os.makedirs(root_result_dir, exist_ok=True)
-
-    log_file = os.path.join(root_result_dir, 'log_eval_one.txt')
-    logger = create_logger(log_file)
-    logger.info('**********************Start logging**********************')
-    for key, val in vars(args).items():
-        logger.info("{:16} {}".format(key, val))
-    save_config_to_file(cfg, logger=logger)
-
 
     model = GeneralizedPointRCNN(num_classes=loader.dataset.num_class, use_xyz=True, mode='TEST')
     model.cuda()
@@ -953,6 +945,14 @@ if __name__ == "__main__":
             assert os.path.exists(ckpt_dir), '%s' % ckpt_dir
             repeat_eval_ckpt(root_result_dir, ckpt_dir)
         else:
+
+            log_file = os.path.join(root_result_dir, 'log_eval_one.txt')
+            logger = create_logger(log_file)
+            logger.info('**********************Start logging**********************')
+            for key, val in vars(args).items():
+                logger.info("{:16} {}".format(key, val))
+            save_config_to_file(cfg, logger=logger)
             source_test_loader, target_test_loader = create_dataloader_da(logger)
-            eval_single_ckpt(root_result_dir, source_test_loader, is_source=True)
-            eval_single_ckpt(root_result_dir, target_test_loader, is_source=False)
+            eval_single_ckpt(root_result_dir, source_test_loader, is_source=True, logger)
+            eval_single_ckpt(root_result_dir, target_test_loader, is_source=False, logger)
+
