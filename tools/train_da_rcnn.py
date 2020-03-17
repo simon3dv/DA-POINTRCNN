@@ -13,7 +13,7 @@ from functools import partial
 from lib.net.generalized_point_rcnn import GeneralizedPointRCNN
 import lib.net.train_functions_da as train_functions
 from lib.datasets.kitti_rcnn_dataset import KittiRCNNDataset
-from lib.datasets.nuscenes2kitti_rcnn_dataset import Nuscenes2KittiRCNNDataset
+from lib.datasets.nuscenes2kitti_rcnn_dataset import nuscenes2kittiRCNNDataset
 from lib.config import cfg, cfg_from_file, save_config_to_file
 import tools.train_utils.train_utils as train_utils
 from tools.train_utils.fastai_optim import OptimWrapper
@@ -76,7 +76,7 @@ def create_dataloader(logger):
                                      drop_last=True)
 
     if cfg.DA.ENABLED:
-        target_train_set = Nuscenes2KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.DA.TARGET.SPLIT,
+        target_train_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.DA.TARGET.SPLIT,
                                             mode='TRAIN',
                                             logger=logger,
                                             classes=cfg.CLASSES,
@@ -100,7 +100,7 @@ def create_dataloader(logger):
                                  num_workers=args.workers, collate_fn=source_test_set.collate_batch)
 
         if cfg.DA.ENABLED:
-            target_test_set = Nuscenes2KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS,
+            target_test_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS,
                                                split=cfg.DA.TARGET.VAL_SPLIT, mode='EVAL',
                                                logger=logger,
                                                classes=cfg.CLASSES,
