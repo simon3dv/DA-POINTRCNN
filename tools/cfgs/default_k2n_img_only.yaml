@@ -133,7 +133,7 @@ DA:
         GRL_WEIGHT: 0.1
         LOSS_WEIGHT: 1.0
     DA_INS:
-        ENABLED: True
+        ENABLED: False
         GRL_WEIGHT: 0.1
         LOSS_WEIGHT: 1.0
     DA_CST:
