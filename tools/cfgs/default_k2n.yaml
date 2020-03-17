@@ -138,7 +138,7 @@ DA:
 # general training config
 TRAIN:
     SPLIT: train
-    VAL_SPLIT: v1.0-trainval
+    VAL_SPLIT: v1.0-val
 
     LR: 0.002
     LR_CLIP: 0.00001

@@ -38,10 +38,12 @@ def model_joint_fn_decorator():
         tb_dict = {}
         disp_dict = {}
         loss = 0
+
+        # Only caculate detection loss that is_source==True
+        domain_mask = np.where(data['is_source'] == True)[0]  # B,
         if cfg.RPN.ENABLED and not cfg.RPN.FIXED:
-            rpn_cls, rpn_reg = ret_dict['rpn_cls'], ret_dict['rpn_reg']
-            domain_mask = np.where(data['is_source']==True)[0]
-            rpn_cls = rpn_cls[domain_mask, ...]
+            rpn_cls, rpn_reg = ret_dict['rpn_cls'], ret_dict['rpn_reg'] # B,N,1 B,N,76 (include source and target)
+            rpn_cls = rpn_cls[domain_mask, ...] # B,N,1 (include source only, B is change)
             rpn_reg = rpn_reg[domain_mask, ...]
             rpn_cls_label = rpn_cls_label[domain_mask, ...]
             rpn_reg_label = rpn_reg_label[domain_mask, ...]
@@ -50,9 +52,13 @@ def model_joint_fn_decorator():
             disp_dict['rpn_loss'] = rpn_loss.item()
 
         if cfg.RCNN.ENABLED:
+            for key in ret_dict.keys():
+                ret_dict[key] = ret_dict[key][domain_mask, ...]
+
             rcnn_loss = get_rcnn_loss(model, ret_dict, tb_dict)
             disp_dict['reg_fg_sum'] = tb_dict['rcnn_reg_fg']
             loss += rcnn_loss
+            ipdb.set_trace()
 
 
         if cfg.DA.ENABLED and cfg.RPN.ENABLED and not cfg.RPN.FIXED:

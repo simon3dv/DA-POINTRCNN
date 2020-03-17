@@ -347,6 +347,9 @@ class KittiRCNNDataset(KittiDataset):
             pts_input = np.concatenate((aug_pts_rect, ret_pts_features), axis=1)  # (N, C)
         else:
             pts_input = aug_pts_rect
+
+        sample_info['is_source'] = True if self.is_source else False
+
         if cfg.RPN.FIXED:
             sample_info['pts_input'] = pts_input
             sample_info['pts_rect'] = aug_pts_rect
@@ -363,7 +366,7 @@ class KittiRCNNDataset(KittiDataset):
         sample_info['rpn_cls_label'] = rpn_cls_label
         sample_info['rpn_reg_label'] = rpn_reg_label
         sample_info['gt_boxes3d'] = aug_gt_boxes3d
-        sample_info['is_source'] = True if self.is_source else False
+
 
         return sample_info
 
@@ -1147,7 +1150,7 @@ if __name__ == '__main__':
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
-    train_mode = 'rpn'
+    train_mode = 'rcnn'
     if train_mode == 'rpn':
         cfg.RPN.ENABLED = True
         cfg.RCNN.ENABLED = False
@@ -1229,6 +1232,5 @@ if __name__ == '__main__':
             elif isinstance(batch[0][key], float):
                 ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
     input_data = ans_dict
-
     # PointRCNN
     loss, tb_dict, disp_dict = train_functions.model_joint_fn_decorator()(model, input_data)
