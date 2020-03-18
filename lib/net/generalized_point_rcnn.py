@@ -240,6 +240,7 @@ class GeneralizedPointRCNN(nn.Module):
                 rcnn_output = self.rcnn_net(rcnn_input_info)
                 output.update(rcnn_output)
 
+                output['pts_feature'] = output['pts_feature'].contiguous()
                 if cfg.DA.ENABLED and cfg.DA.DA_INS.ENABLED and self.training:
                     da_rcnn_output = self.da_rcnn(output['l_features']) # l_features: [B*64, 512, 133]
                     output.update(da_rcnn_output)
