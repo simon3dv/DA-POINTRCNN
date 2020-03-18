@@ -226,12 +226,11 @@ class GeneralizedPointRCNN(nn.Module):
 
                     # proposal layer
                     rois, roi_scores_raw = self.rpn.proposal_layer(rpn_scores_raw, rpn_reg, backbone_xyz)  # (B, M, 7)
-
                     output['rois'] = rois
                     output['roi_scores_raw'] = roi_scores_raw
                     output['seg_result'] = seg_mask
                 rcnn_input_info = {'rpn_xyz': backbone_xyz,
-                                   'rpn_features': backbone_features.permute((0, 2, 1)),
+                                   'rpn_features': backbone_features.permute((0, 2, 1)).contiguous(),
                                    'seg_mask': seg_mask,
                                    'roi_boxes3d': rois,
                                    'pts_depth': pts_depth}
