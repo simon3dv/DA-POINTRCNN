@@ -251,5 +251,4 @@ class GeneralizedPointRCNN(nn.Module):
             ipdb.set_trace()
         else:
             raise NotImplementedError
-
         return output
