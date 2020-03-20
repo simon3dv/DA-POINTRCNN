@@ -84,7 +84,7 @@ def model_joint_fn_decorator():
             if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
                 da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict)
                 loss += da_rcnn_loss * 1.0  # DA_INS_LOSS_WEIGHT
-                disp_dict['da_rcnn_loss'] = da_rcnn_loss * 1.0
+                disp_dict['da_rcnn_loss'] = da_rcnn_loss.item() * 1.0
             if cfg.DA.DA_CST.ENABLED:
                 pass
         disp_dict['loss'] = loss.item()
