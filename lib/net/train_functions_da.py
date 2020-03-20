@@ -34,7 +34,6 @@ def model_joint_fn_decorator():
                 input_data['pts_input'] = pts_input
 
         ret_dict = model(input_data)
-
         tb_dict = {}
         disp_dict = {}
         loss = 0
@@ -65,6 +64,7 @@ def model_joint_fn_decorator():
             domain_mask_for_rois = np.where(is_source_for_rois == True)[0]
 
             for key in ret_dict.keys():
+                if key == 'da_ins': continue
                 bs = ret_dict[key].shape[0]
                 if bs == is_source.shape[0]:
                     ret_dict[key] = ret_dict[key][domain_mask, ...]
