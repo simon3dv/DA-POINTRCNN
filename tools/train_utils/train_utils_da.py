@@ -6,7 +6,7 @@ from torch.nn.utils import clip_grad_norm_
 import tqdm
 import torch.optim.lr_scheduler as lr_sched
 import math
-
+import numpy as np
 
 logging.getLogger(__name__).addHandler(logging.StreamHandler())
 cur_logger = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ class Trainer(object):
     def eval_epoch(self, d_loader):
         self.model.eval()
 
-        eval_dict = {}
+        target_eval_dict = {}
         total_loss = count = 0.0
 
         # eval one epoch
@@ -152,28 +152,63 @@ class Trainer(object):
             total_loss += loss.item()
             count += 1
             for k, v in tb_dict.items():
-                eval_dict[k] = eval_dict.get(k, 0) + v
+                target_eval_dict[k] = target_eval_dict.get(k, 0) + v
 
         # statistics this epoch
-        for k, v in eval_dict.items():
-            eval_dict[k] = eval_dict[k] / max(count, 1)
+        for k, v in target_eval_dict.items():
+            target_eval_dict[k] = target_eval_dict[k] / max(count, 1)
 
         cur_performance = 0
-        if 'recalled_cnt' in eval_dict:
-            eval_dict['recall'] = eval_dict['recalled_cnt'] / max(eval_dict['gt_cnt'], 1)
-            cur_performance = eval_dict['recall']
-        elif 'iou' in eval_dict:
-            cur_performance = eval_dict['iou']
+        if 'recalled_cnt' in target_eval_dict:
+            target_eval_dict['recall'] = target_eval_dict['recalled_cnt'] / max(target_eval_dict['gt_cnt'], 1)
+            cur_performance = target_eval_dict['recall']
+        elif 'iou' in target_eval_dict:
+            cur_performance = target_eval_dict['iou']
 
-        return total_loss / count, eval_dict, cur_performance
+        return total_loss / count, target_eval_dict, cur_performance
 
-    def train(self, start_it, start_epoch, n_epochs, train_loader, test_loader=None, ckpt_save_interval=5,
+    """
+    def collate_batch(self, cfg, batch):
+        batch_size = batch.__len__()
+        ans_dict = {}
+        import ipdb
+        ipdb.set_trace()
+
+        for key in batch[0].keys():
+            if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
+                    (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
+                max_gt = 0
+                for k in range(batch_size):
+                    max_gt = max(max_gt, batch[k][key].__len__())
+                batch_gt_boxes3d = np.zeros((batch_size, max_gt, 7), dtype=np.float32)
+                for i in range(batch_size):
+                    batch_gt_boxes3d[i, :batch[i][key].__len__(), :] = batch[i][key]
+                ans_dict[key] = batch_gt_boxes3d
+                continue
+
+            if isinstance(batch[0][key], np.ndarray):
+                if batch_size == 1:
+                    ans_dict[key] = batch[0][key][np.newaxis, ...]
+                else:
+                    ans_dict[key] = np.concatenate([batch[k][key][np.newaxis, ...] for k in range(batch_size)], axis=0)
+
+            else:
+                ans_dict[key] = [batch[k][key] for k in range(batch_size)]
+                if isinstance(batch[0][key], int):
+                    ans_dict[key] = np.array(ans_dict[key], dtype=np.int32)
+                elif isinstance(batch[0][key], float):
+                    ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
+
+        return ans_dict
+    """
+    def train(self, cfg, start_it, start_epoch, n_epochs, source_train_loader, source_test_loader,
+              target_train_loader, target_test_loader, ckpt_save_interval=5,
               lr_scheduler_each_iter=False):
         eval_frequency = self.eval_frequency if self.eval_frequency > 0 else 1
 
         it = start_it
         with tqdm.trange(start_epoch, n_epochs, desc='epochs') as tbar, \
-                tqdm.tqdm(total=len(train_loader), leave=False, desc='train') as pbar:
+                tqdm.tqdm(total=len(source_train_loader), leave=False, desc='train') as pbar:
 
             for epoch in tbar:
                 if self.lr_scheduler is not None and self.warmup_epoch <= epoch and (not lr_scheduler_each_iter):
@@ -184,7 +219,29 @@ class Trainer(object):
                     self.tb_log.add_scalar('bn_momentum', self.bnm_scheduler.lmbd(epoch), it)
 
                 # train one epoch
-                for cur_it, batch in enumerate(train_loader):
+                for cur_it, (source_batch, target_batch) in enumerate(zip(source_train_loader, target_train_loader)):
+
+                    batch = [source_batch, target_batch]
+                    batch = {}
+                    for key, value in source_batch.items():
+                        if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
+                                (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
+                            max_gt = 0
+                            batch_size = value.shape[0]
+                            for k in range(batch_size):
+                                max_gt = max(max_gt, source_batch[key][k].__len__())
+                                max_gt = max(max_gt, target_batch[key][k].__len__())
+                            batch_gt_boxes3d = np.zeros((batch_size*2, max_gt, 7), dtype=np.float32)
+                            for i in range(batch_size):
+                                batch_gt_boxes3d[i, :source_batch[key][i].__len__(), :] = source_batch[key][i]
+                            for i in range(batch_size,batch_size*2):
+                                batch_gt_boxes3d[i, :target_batch[key][i-batch_size].__len__(), :] = target_batch[key][i-batch_size]
+                            batch[key] = batch_gt_boxes3d
+                        elif type(value) == np.ndarray:
+                            batch[key] = np.concatenate([source_batch[key], target_batch[key]], 0)
+                        elif type(value) == list:
+                            batch[key] = source_batch[key] + target_batch[key]
+
                     if lr_scheduler_each_iter:
                         self.lr_scheduler.step(it)
                         cur_lr = float(self.optimizer.lr)
@@ -224,17 +281,26 @@ class Trainer(object):
                 # eval one epoch
                 if (epoch % eval_frequency) == 0:
                     pbar.close()
-                    if test_loader is not None:
+                    if source_test_loader is not None:
                         with torch.set_grad_enabled(False):
-                            val_loss, eval_dict, cur_performance = self.eval_epoch(test_loader)
+                            source_val_loss, source_eval_dict, cur_performance = self.eval_epoch(source_test_loader)
 
                         if self.tb_log is not None:
-                            self.tb_log.add_scalar('val_loss', val_loss, it)
-                            for key, val in eval_dict.items():
-                                self.tb_log.add_scalar('val_' + key, val, it)
+                            self.tb_log.add_scalar('source_val_loss', source_val_loss, it)
+                            for key, val in source_eval_dict.items():
+                                self.tb_log.add_scalar('source_val_' + key, val, it)
+
+                    if target_test_loader is not None:
+                        with torch.set_grad_enabled(False):
+                            target_val_loss, target_eval_dict, cur_performance = self.eval_epoch(target_test_loader)
+
+                        if self.tb_log is not None:
+                            self.tb_log.add_scalar('target_val_loss', target_val_loss, it)
+                            for key, val in target_eval_dict.items():
+                                self.tb_log.add_scalar('target_val_' + key, val, it)
 
                 pbar.close()
-                pbar = tqdm.tqdm(total=len(train_loader), leave=False, desc='train')
+                pbar = tqdm.tqdm(total=len(source_train_loader), leave=False, desc='train')
                 pbar.set_postfix(dict(total_it=it))
 
         return None

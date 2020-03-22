@@ -15,7 +15,7 @@ import lib.net.train_functions_da as train_functions
 from lib.datasets.kitti_rcnn_dataset import KittiRCNNDataset
 from lib.datasets.nuscenes2kitti_rcnn_dataset import nuscenes2kittiRCNNDataset
 from lib.config import cfg, cfg_from_file, save_config_to_file
-import tools.train_utils.train_utils as train_utils
+import tools.train_utils.train_utils_da as train_utils
 from tools.train_utils.fastai_optim import OptimWrapper
 from tools.train_utils import learning_schedules_fastai as lsf
 import ipdb
