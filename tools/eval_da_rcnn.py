@@ -892,15 +892,15 @@ def create_dataloader_da(logger):
     source_test_loader = DataLoader(source_test_set, batch_size=1, shuffle=True, pin_memory=True,
                                  num_workers=args.workers, collate_fn=source_test_set.collate_batch)
 
-    if cfg.DA.ENABLED:
-        target_test_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS,
+
+    target_test_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS,
                                                split=cfg.DA.TARGET.VAL_SPLIT, mode='EVAL',
                                                logger=logger,
                                                classes=cfg.CLASSES,
                                                rcnn_eval_roi_dir=args.rcnn_eval_roi_dir,
                                                rcnn_eval_feature_dir=args.rcnn_eval_feature_dir,
                                                is_source = False)
-        target_test_loader = DataLoader(target_test_set, batch_size=1, shuffle=True, pin_memory=True,
+    target_test_loader = DataLoader(target_test_set, batch_size=1, shuffle=True, pin_memory=True,
                                             num_workers=args.workers, collate_fn=target_test_set.collate_batch)
 
     return source_test_loader, target_test_loader
