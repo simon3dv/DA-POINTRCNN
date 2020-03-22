@@ -1146,7 +1146,7 @@ class KittiRCNNDataset(KittiDataset):
 
 if __name__ == '__main__':
     from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
-    cfg_file = 'cfgs/default_k2n.yaml'#'tools/cfgs/default.yaml'
+    cfg_file = 'cfgs/default_k2n_img_only.yaml'#'tools/cfgs/default.yaml'
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 

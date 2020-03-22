@@ -101,6 +101,7 @@ def model_joint_fn_decorator():
         mask = np.where(is_source)[0]
         da_img_labels[mask,:] = 1
         da_rpn_loss = F.binary_cross_entropy(torch.sigmoid(da_img.view(-1)), da_img_labels.view(-1))
+        da_rpn_loss = da_rpn_loss / da_img.view(-1).shape[0]
         tb_dict['da_rpn_loss'] = da_rpn_loss.item()
         tb_dict.update({'da_rpn_loss': da_rpn_loss.item()})
         return da_rpn_loss
@@ -113,6 +114,7 @@ def model_joint_fn_decorator():
         da_ins = da_ins.squeeze() # B,
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
         da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
+        da_rcnn_loss = da_rcnn_loss / da_ins.shape[0]
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
         tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
         return da_rcnn_loss

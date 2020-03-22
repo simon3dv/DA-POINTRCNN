@@ -80,32 +80,6 @@ __C.RPN.SCORE_THRESH = 0.3
 __C.RCNN = edict()
 __C.RCNN.ENABLED = False
 
-# 3. config of domain adaptation network
-__C.DA = edict()
-__C.DA.ENABLED = False
-
-__C.DA.DA_IMG = edict()
-__C.DA.DA_IMG.ENABLED = False
-__C.DA.DA_IMG.GRL_WEIGHT = 0.1
-__C.DA.DA_IMG.LOSS_WEIGHT = 1.0
-
-__C.DA.DA_INS = edict()
-__C.DA.DA_INS.ENABLED = False
-__C.DA.DA_INS.GRL_WEIGHT = 0.1
-__C.DA.DA_INS.LOSS_WEIGHT = 1.0
-
-__C.DA.DA_CST = edict()
-__C.DA.DA_CST.ENABLED = False
-__C.DA.DA_CST.LOSS_WEIGHT = 1.0
-
-__C.DA.SOURCE = edict()
-__C.DA.SOURCE.SPLIT = 'train'
-__C.DA.SOURCE.VAL_SPLIT = 'val'
-
-__C.DA.TARGET = edict()
-__C.DA.TARGET.SPLIT = 'v1.0-train'
-__C.DA.TARGET.VAL_SPLIT = 'v1.0-val'
-
 # config of input
 __C.RCNN.USE_RPN_FEATURES = True
 __C.RCNN.USE_MASK = True
@@ -163,6 +137,31 @@ __C.RCNN.HARD_BG_RATIO = 0.6
 __C.RCNN.SCORE_THRESH = 0.3
 __C.RCNN.NMS_THRESH = 0.1
 
+# 3. config of domain adaptation network
+__C.DA = edict()
+__C.DA.ENABLED = False
+
+__C.DA.DA_IMG = edict()
+__C.DA.DA_IMG.ENABLED = False
+__C.DA.DA_IMG.GRL_WEIGHT = 0.1
+__C.DA.DA_IMG.LOSS_WEIGHT = 1.0
+
+__C.DA.DA_INS = edict()
+__C.DA.DA_INS.ENABLED = False
+__C.DA.DA_INS.GRL_WEIGHT = 0.1
+__C.DA.DA_INS.LOSS_WEIGHT = 1.0
+
+__C.DA.DA_CST = edict()
+__C.DA.DA_CST.ENABLED = False
+__C.DA.DA_CST.LOSS_WEIGHT = 1.0
+
+__C.DA.SOURCE = edict()
+__C.DA.SOURCE.SPLIT = 'train'
+__C.DA.SOURCE.VAL_SPLIT = 'val'
+
+__C.DA.TARGET = edict()
+__C.DA.TARGET.SPLIT = 'v1.0-train'
+__C.DA.TARGET.VAL_SPLIT = 'v1.0-val'
 
 # general training config
 __C.TRAIN = edict()
