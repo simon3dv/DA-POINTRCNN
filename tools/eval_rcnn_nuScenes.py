@@ -405,7 +405,7 @@ def eval_one_epoch_rcnn(model, dataloader, epoch_id, result_dir, logger):
     progress_bar.close()
 
     # dump empty files
-    split_file = os.path.join(dataset.imageset_dir, '..', '..', 'ImageSets', dataset.split + '.txt')
+    split_file = os.path.join(dataset.imageset_dir, '..', 'ImageSets', dataset.split + '.txt')
     split_file = os.path.abspath(split_file)
     image_idx_list = [x.strip() for x in open(split_file).readlines()]
     empty_cnt = 0
