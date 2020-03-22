@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import torch.nn.functional as F
 from lib.net.point_rcnn import PointRCNN
 #from lib.datasets.kitti_rcnn_dataset import KittiRCNNDataset
-from lib.datasets.nuscenes2kitti_rcnn_dataset import nuscenes2kittiRCNNDataset
+from lib.datasets.nuscenes2kitti_rcnn_dataset import KittiRCNNDataset
 import tools.train_utils.train_utils as train_utils
 from lib.utils.bbox_transform import decode_bbox_target
 from tools.kitti_object_eval_python.evaluate import evaluate as kitti_evaluate
