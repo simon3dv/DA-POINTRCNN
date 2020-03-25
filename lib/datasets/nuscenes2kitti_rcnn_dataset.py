@@ -277,7 +277,7 @@ class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
         pts_rect = pts_rect[pts_valid_flag][:, 0:3]
         pts_intensity = pts_intensity[pts_valid_flag]
 
-        if cfg.GT_AUG_ENABLED and self.mode == 'TRAIN':
+        if False and cfg.GT_AUG_ENABLED and self.mode == 'TRAIN':
             # all labels for checking overlapping
             all_gt_obj_list = self.filtrate_dc_objects(self.get_label(sample_id))
             all_gt_boxes3d = kitti_utils.objs_to_boxes3d(all_gt_obj_list)
@@ -329,7 +329,7 @@ class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
             return sample_info
 
         gt_obj_list = self.filtrate_objects(self.get_label(sample_id))
-        if cfg.GT_AUG_ENABLED and self.mode == 'TRAIN' and gt_aug_flag:
+        if False and cfg.GT_AUG_ENABLED and self.mode == 'TRAIN' and gt_aug_flag:
             gt_obj_list.extend(extra_gt_obj_list)
         gt_boxes3d = kitti_utils.objs_to_boxes3d(gt_obj_list)
 
