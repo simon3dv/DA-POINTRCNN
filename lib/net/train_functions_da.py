@@ -97,7 +97,7 @@ def model_joint_fn_decorator():
                 loss += da_rpn_loss*1.0 # DA_IMG_LOSS_WEIGHT
                 disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
             if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
-                da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, ret_dict['cls_label'], tb_dict)
+                da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict)
                 loss += da_rcnn_loss * 1.0  # DA_INS_LOSS_WEIGHT
                 disp_dict['da_rcnn_loss'] = da_rcnn_loss.item() * 1.0
             if cfg.DA.DA_CST.ENABLED:
@@ -121,17 +121,14 @@ def model_joint_fn_decorator():
         tb_dict.update({'da_rpn_loss': da_rpn_loss.item()})
         return da_rpn_loss
 
-    def get_da_rcnn_loss(da_ins, is_source_for_rois, cls_label, tb_dict):
+    def get_da_rcnn_loss(da_ins, is_source_for_rois, tb_dict):
         """
         :param da_ins:B*n_rois, 1, 1
         :param is_source_for_rois: B*n_rois,
         """
         da_ins = da_ins.squeeze() # B,
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
-        da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels, reduction='none')
-        cls_label_flat = cls_label.float().view(-1)
-        cls_valid_mask = (cls_label_flat >= 0).float()
-        da_rcnn_loss = (da_rcnn_loss * cls_valid_mask).sum() / torch.clamp(cls_valid_mask.sum(), min=1.0)
+        da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
         tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
         return da_rcnn_loss
