@@ -25,8 +25,8 @@ def model_joint_fn_decorator():
             else:
                 print(key,type(data[key], data[key]))
         print()
-
     def model_fn(model, data):
+        print_dict(data,'data before rpn')
         if cfg.RPN.ENABLED:
             pts_rect, pts_features, pts_input = data['pts_rect'], data['pts_features'], data['pts_input']
             gt_boxes3d = data['gt_boxes3d']
@@ -48,7 +48,9 @@ def model_joint_fn_decorator():
                 pts_input = torch.cat((input_data['pts_input'], input_data['pts_features']), dim=-1)
                 input_data['pts_input'] = pts_input
         input_data['is_source'] = data['is_source'] # To avoid using gt when sampling
+        print_dict(input_data, 'input_data before model')
         ret_dict = model(input_data)
+        print_dict(ret_dict, 'ret_dit after model')
         tb_dict = {}
         disp_dict = {}
         loss = 0
@@ -121,7 +123,7 @@ def model_joint_fn_decorator():
         tb_dict.update({'da_rpn_loss': da_rpn_loss.item()})
         return da_rpn_loss
 
-    def get_da_rcnn_loss(da_ins, is_source_for_rois, cls_label, tb_dict):
+    def get_da_rcnn_loss(da_ins, is_source_for_rois, tb_dict):
         """
         :param da_ins:B*n_rois, 1, 1
         :param is_source_for_rois: B*n_rois,
@@ -129,11 +131,7 @@ def model_joint_fn_decorator():
         da_ins = da_ins.squeeze() # B,
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
         da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
-        ipdb.set_trace()
-        cls_valid_mask = (rpn_cls_label_flat >= 0).float()
-        cls_label = ret_dict['cls_label'].float()
-        cls_valid_mask = (cls_label_flat >= 0).float()
-        da_rcnn_loss = (da_rcnn_loss * cls_valid_mask).sum() / torch.clamp(cls_valid_mask.sum(), min=1.0)
+        da_rcnn_loss = da_rcnn_loss
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
         tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
         return da_rcnn_loss

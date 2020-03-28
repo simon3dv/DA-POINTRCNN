@@ -208,10 +208,10 @@ class GeneralizedPointRCNN(nn.Module):
                     output.update(da_rpn_output)
             """
             rpn_output:
-            rpn_cls: B,N,1
-            rpn_reg: B,N,76
-            backbone_xyz B,N,3
-            backbone_features: B,128,N
+                rpn_cls: B,N,1
+                rpn_reg: B,N,76
+                backbone_xyz B,N,3
+                backbone_features: B,128,N
             """
             # rcnn inference
             if cfg.RCNN.ENABLED:
@@ -229,11 +229,13 @@ class GeneralizedPointRCNN(nn.Module):
                     output['rois'] = rois
                     output['roi_scores_raw'] = roi_scores_raw
                     output['seg_result'] = seg_mask
+
                 rcnn_input_info = {'rpn_xyz': backbone_xyz,
                                    'rpn_features': backbone_features.permute((0, 2, 1)).contiguous(),
                                    'seg_mask': seg_mask,
                                    'roi_boxes3d': rois,
                                    'pts_depth': pts_depth}
+                rcnn_input_info['is_source'] = input_data['is_source'] # To avoid using gt when sampling
                 if self.training:
                     rcnn_input_info['gt_boxes3d'] = input_data['gt_boxes3d']
 

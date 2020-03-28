@@ -120,7 +120,16 @@ class RCNNNet(nn.Module):
             if self.training:
                 with torch.no_grad():
                     target_dict = self.proposal_target_layer(input_data)
-
+                """
+                target_dict:
+                    sampled_pts [B*64, 512, 3]
+                    pts_feature [B*64, 512, 130]
+                    cls_label [B*64]
+                    reg_valid_mask [B*64]
+                    gt_of_rois [B*64, 7]
+                    gt_iou [B*64]
+                    roi_boxes3d [B*64, 7]
+                """
                 pts_input = torch.cat((target_dict['sampled_pts'], target_dict['pts_feature']), dim=2)
                 target_dict['pts_input'] = pts_input
             else:

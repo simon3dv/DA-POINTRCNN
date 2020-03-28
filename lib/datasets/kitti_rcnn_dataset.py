@@ -1146,7 +1146,7 @@ class KittiRCNNDataset(KittiDataset):
 
 if __name__ == '__main__':
     from lib.config import cfg, cfg_from_file, save_config_to_file, cfg_from_list
-    cfg_file = 'cfgs/default_k2n_img_only.yaml'#'tools/cfgs/default.yaml'
+    cfg_file = 'cfgs/default_k2n_img_only_debug.yaml'#'tools/cfgs/default.yaml'
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
@@ -1192,6 +1192,7 @@ if __name__ == '__main__':
                                 logger=logger)
     dataset[0]
     """
+    gt_database_dir = 'gt_database/train_gt_database_3level_Car.pkl'
     train_set = KittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TRAIN.SPLIT, mode='TRAIN',
                                  logger=logger,
                                  classes=cfg.CLASSES,
@@ -1202,7 +1203,7 @@ if __name__ == '__main__':
     batch = [train_set[0],train_set[1]]
     from lib.net.generalized_point_rcnn import GeneralizedPointRCNN
     model = GeneralizedPointRCNN(num_classes=2, use_xyz=True, mode='TRAIN').cuda()
-    import lib.net.train_functions_da as train_functions
+    import lib.net.train_functions_da_debug as train_functions
 
     batch_size = 2
     ans_dict = {}
@@ -1232,5 +1233,11 @@ if __name__ == '__main__':
             elif isinstance(batch[0][key], float):
                 ans_dict[key] = np.array(ans_dict[key], dtype=np.float32)
     input_data = ans_dict
+    print('1.input_data:')
+    for key in input_data.keys():
+        if isinstance(input_data[key], np.ndarray):
+            print(key,input_data[key].shape)
+        else:
+            print(key,input_data[key])
     # PointRCNN
     loss, tb_dict, disp_dict = train_functions.model_joint_fn_decorator()(model, input_data)

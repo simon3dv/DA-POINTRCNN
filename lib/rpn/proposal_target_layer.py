@@ -13,8 +13,8 @@ class ProposalTargetLayer(nn.Module):
 
     def forward(self, input_dict):
         roi_boxes3d, gt_boxes3d = input_dict['roi_boxes3d'], input_dict['gt_boxes3d'] # B,512,7 B,n,7
-
-        batch_rois, batch_gt_of_rois, batch_roi_iou = self.sample_rois_for_rcnn(roi_boxes3d, gt_boxes3d) # B,64,7 B,64,7 B,64
+        is_source = input_dict['is_source']
+        batch_rois, batch_gt_of_rois, batch_roi_iou = self.sample_rois_for_rcnn(roi_boxes3d, gt_boxes3d, is_source) # B,64,7 B,64,7 B,64
 
         rpn_xyz, rpn_features = input_dict['rpn_xyz'], input_dict['rpn_features']
         if cfg.RCNN.USE_INTENSITY:
@@ -73,7 +73,7 @@ class ProposalTargetLayer(nn.Module):
                        'roi_boxes3d': batch_rois.view(-1, 7)} # 128,7
         return output_dict
 
-    def sample_rois_for_rcnn(self, roi_boxes3d, gt_boxes3d):
+    def sample_rois_for_rcnn(self, roi_boxes3d, gt_boxes3d, is_source):
         """
         :param roi_boxes3d: (B, M, 7)
         :param gt_boxes3d: (B, N, 8) [x, y, z, h, w, l, ry, cls]
@@ -91,6 +91,17 @@ class ProposalTargetLayer(nn.Module):
         batch_roi_iou = gt_boxes3d.new(batch_size, cfg.RCNN.ROI_PER_IMAGE).zero_()
 
         for idx in range(batch_size):
+
+            if not is_source[idx]:
+                # random choose because of no gt
+                fg_rois_per_this_image = cfg.RCNN.ROI_PER_IMAGE
+                fg_inds = np.random.choice(roi_boxes3d.shape[1],fg_rois_per_this_image)
+                # fg_inds = torch.tensor(fg_inds,device=roi_boxes3d.device)
+                batch_rois[idx] = roi_boxes3d[idx,fg_inds,:]
+                batch_gt_of_rois[idx] = torch.zeros(roi_boxes3d[idx,fg_inds,:].shape)
+                batch_roi_iou[idx] = torch.zeros(fg_rois_per_this_image)
+                continue
+
             cur_roi, cur_gt = roi_boxes3d[idx], gt_boxes3d[idx]
 
             k = cur_gt.__len__() - 1
@@ -174,7 +185,6 @@ class ProposalTargetLayer(nn.Module):
             batch_rois[idx] = rois
             batch_gt_of_rois[idx] = gt_of_rois
             batch_roi_iou[idx] = iou_of_rois
-
         return batch_rois, batch_gt_of_rois, batch_roi_iou
 
     def sample_bg_inds(self, hard_bg_inds, easy_bg_inds, bg_rois_per_this_image):
