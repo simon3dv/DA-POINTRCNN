@@ -97,7 +97,7 @@ def model_joint_fn_decorator():
                 loss += da_rpn_loss*1.0 # DA_IMG_LOSS_WEIGHT
                 disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
             if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
-                da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, data['is_source'], tb_dict)
+                da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, ret_dict['cls_label'] tb_dict)
                 loss += da_rcnn_loss * 1.0  # DA_INS_LOSS_WEIGHT
                 disp_dict['da_rcnn_loss'] = da_rcnn_loss.item() * 1.0
             if cfg.DA.DA_CST.ENABLED:
@@ -128,10 +128,8 @@ def model_joint_fn_decorator():
         """
         da_ins = da_ins.squeeze() # B,
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
-        da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
-        ipdb.set_trace()
-        cls_valid_mask = (rpn_cls_label_flat >= 0).float()
-        cls_label = ret_dict['cls_label'].float()
+        da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels, reduction='none')
+        cls_label = cls_label.float()
         cls_valid_mask = (cls_label_flat >= 0).float()
         da_rcnn_loss = (da_rcnn_loss * cls_valid_mask).sum() / torch.clamp(cls_valid_mask.sum(), min=1.0)
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
