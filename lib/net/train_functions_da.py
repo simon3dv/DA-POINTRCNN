@@ -129,7 +129,7 @@ def model_joint_fn_decorator():
         da_ins = da_ins.squeeze() # B,
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
         da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels, reduction='none')
-        cls_label = cls_label.float()
+        cls_label_flat = cls_label.float().view(-1)
         cls_valid_mask = (cls_label_flat >= 0).float()
         da_rcnn_loss = (da_rcnn_loss * cls_valid_mask).sum() / torch.clamp(cls_valid_mask.sum(), min=1.0)
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
