@@ -235,8 +235,9 @@ class GeneralizedPointRCNN(nn.Module):
                                    'seg_mask': seg_mask,
                                    'roi_boxes3d': rois,
                                    'pts_depth': pts_depth}
-                rcnn_input_info['is_source'] = input_data['is_source'] # To avoid using gt when sampling
+                
                 if self.training:
+                    rcnn_input_info['is_source'] = input_data['is_source'] # To avoid using gt when sampling
                     rcnn_input_info['gt_boxes3d'] = input_data['gt_boxes3d']
 
                 rcnn_output = self.rcnn_net(rcnn_input_info)
