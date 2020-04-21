@@ -33,8 +33,6 @@ class KittiRCNNDataset(KittiDataset):
         self.num_class = self.classes.__len__()
 
         self.npoints = npoints
-        if cfg.DA.INPUT_DROPOUT:
-            self.npoints = int(npoints/2)
         self.sample_id_list = []
         self.random_select = random_select
         self.logger = logger
@@ -127,7 +125,6 @@ class KittiRCNNDataset(KittiDataset):
         if cfg.DA.INPUT_DROPOUT:
             choose = np.random.choice(pts.shape[0], int(pts.shape[0]/2), replace=False)
             pts = pts[choose,:]
-            print('INPUT_DROPOUT Done. len(pts):',len(pts))
         return pts
 
     def get_label(self, idx):
