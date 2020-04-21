@@ -127,6 +127,7 @@ class KittiRCNNDataset(KittiDataset):
         if cfg.DA.INPUT_DROPOUT:
             choose = np.random.choice(pts.shape[0], int(pts.shape[0]/2), replace=False)
             pts = pts[choose,:]
+            print('INPUT_DROPOUT Done. len(pts):',len(pts))
         return pts
 
     def get_label(self, idx):
@@ -311,7 +312,6 @@ class KittiRCNNDataset(KittiDataset):
             else:
                 choice = np.arange(0, len(pts_rect), dtype=np.int32)
                 if self.npoints > len(pts_rect):
-                    ipdb.set_trace()
                     extra_choice = np.random.choice(choice, self.npoints - len(pts_rect), replace=False)
                     choice = np.concatenate((choice, extra_choice), axis=0)
                 np.random.shuffle(choice)
