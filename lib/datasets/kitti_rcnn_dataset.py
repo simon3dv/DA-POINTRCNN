@@ -123,7 +123,7 @@ class KittiRCNNDataset(KittiDataset):
         assert os.path.exists(lidar_file)
         pts = np.fromfile(lidar_file, dtype=np.float32).reshape(-1, 4)
         if cfg.DA.INPUT_DROPOUT:
-            choose = np.random.choice(pts.shape[0], pts.shape[0]/2, replace=False)
+            choose = np.random.choice(pts.shape[0], int(pts.shape[0]/2), replace=False)
             pts = pts[choose,:]
         return pts
 
