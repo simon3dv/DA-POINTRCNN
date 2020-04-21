@@ -140,11 +140,25 @@ __C.RCNN.NMS_THRESH = 0.1
 # 3. config of domain adaptation network
 __C.DA = edict()
 __C.DA.ENABLED = False
+__C.DA.INPUT_DROPOUT = False
 
 __C.DA.DA_IMG = edict()
 __C.DA.DA_IMG.ENABLED = False
 __C.DA.DA_IMG.GRL_WEIGHT = 0.1
 __C.DA.DA_IMG.LOSS_WEIGHT = 1.0
+__C.DA.DA_IMG.POOL = False
+__C.DA.DA_IMG.LOSS_CLS = 'SigmoidFocalLoss'
+__C.DA.DA_IMG.FOCAL_ALPHA = [0.5, 0.5]
+__C.DA.DA_IMG.FOCAL_GAMMA = 5.0
+
+__C.DA.DA_IMG_MID_LEVEL = edict()
+__C.DA.DA_IMG_MID_LEVEL.ENABLED = False
+__C.DA.DA_IMG_MID_LEVEL.GRL_WEIGHT = 0.1
+__C.DA.DA_IMG_MID_LEVEL.LOSS_WEIGHT = 1.0
+__C.DA.DA_IMG_MID_LEVEL.POOL = False
+__C.DA.DA_IMG_MID_LEVEL.LOSS_CLS = 'BinaryCrossEntropy'
+__C.DA.DA_IMG_MID_LEVEL.FOCAL_ALPHA = [0.5, 0.5]
+__C.DA.DA_IMG_MID_LEVEL.FOCAL_GAMMA = 5.0
 
 __C.DA.DA_INS = edict()
 __C.DA.DA_INS.ENABLED = False

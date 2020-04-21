@@ -118,6 +118,14 @@ class KittiRCNNDataset(KittiDataset):
 
         self.logger.info('Done: filter %s results: %d / %d\n' % (self.mode, len(self.sample_id_list),
                                                                  len(self.image_idx_list)))
+    def get_lidar(self, idx):
+        lidar_file = os.path.join(self.lidar_dir, '%06d.bin' % idx)
+        assert os.path.exists(lidar_file)
+        pts = np.fromfile(lidar_file, dtype=np.float32).reshape(-1, 4)
+        if cfg.DA.INPUT_DROPOUT:
+            choose = np.random.choice(pts.shape[0], pts.shape[0]/2, replace=False)
+            pts = pts[choose,:]
+        return pts
 
     def get_label(self, idx):
         if idx < 10000:
@@ -1150,7 +1158,7 @@ if __name__ == '__main__':
     cfg_from_file(cfg_file)
     cfg.TAG = os.path.splitext(os.path.basename(cfg_file))[0]
 
-    train_mode = 'rcnn'
+    train_mode = 'rpn'
     if train_mode == 'rpn':
         cfg.RPN.ENABLED = True
         cfg.RCNN.ENABLED = False
@@ -1203,7 +1211,7 @@ if __name__ == '__main__':
     batch = [train_set[0],train_set[1]]
     from lib.net.generalized_point_rcnn import GeneralizedPointRCNN
     model = GeneralizedPointRCNN(num_classes=2, use_xyz=True, mode='TRAIN').cuda()
-    import lib.net.train_functions_da_debug as train_functions
+    import lib.net.train_functions_da as train_functions
 
     batch_size = 2
     ans_dict = {}
