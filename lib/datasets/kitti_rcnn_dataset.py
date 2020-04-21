@@ -33,6 +33,8 @@ class KittiRCNNDataset(KittiDataset):
         self.num_class = self.classes.__len__()
 
         self.npoints = npoints
+        if cfg.DA.INPUT_DROPOUT:
+            self.npoints = int(npoints/2)
         self.sample_id_list = []
         self.random_select = random_select
         self.logger = logger
@@ -309,6 +311,7 @@ class KittiRCNNDataset(KittiDataset):
             else:
                 choice = np.arange(0, len(pts_rect), dtype=np.int32)
                 if self.npoints > len(pts_rect):
+                    ipdb.set_trace()
                     extra_choice = np.random.choice(choice, self.npoints - len(pts_rect), replace=False)
                     choice = np.concatenate((choice, extra_choice), axis=0)
                 np.random.shuffle(choice)
