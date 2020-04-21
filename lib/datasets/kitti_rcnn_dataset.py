@@ -315,7 +315,7 @@ class KittiRCNNDataset(KittiDataset):
                         while(m>1):
                             choice = np.concatenate((choice, choice_temp), axis=0)
                             m = m - 1
-                    extra_choice = np.random.choice(choice, (self.npoints - len(pts_rect)%len(pts_rect), replace=False))
+                    extra_choice = np.random.choice(choice, (self.npoints - len(pts_rect))%len(pts_rect), replace=False)
                     choice = np.concatenate((choice, extra_choice), axis=0)
                 np.random.shuffle(choice)
 
