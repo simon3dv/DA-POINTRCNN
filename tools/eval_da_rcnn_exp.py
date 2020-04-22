@@ -475,7 +475,7 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
 
     logger.info('---- EPOCH %s JOINT EVALUATION ----' % epoch_id)
     logger.info('==> Output file: %s' % result_dir)
-    model.eval()
+    model.train()
 
     thresh_list = [0.1, 0.3, 0.5, 0.7, 0.9]
     total_recalled_bbox_list, total_gt_bbox = [0] * 5, 0
@@ -494,7 +494,6 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
 
         # model inference
         ret_dict = model(input_data)
-        ipdb.set_trace()
         roi_scores_raw = ret_dict['roi_scores_raw']  # (B, M)
         roi_boxes3d = ret_dict['rois']  # (B, M, 7)
         seg_result = ret_dict['seg_result'].long()  # (B, N)
