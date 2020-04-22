@@ -788,7 +788,7 @@ def repeat_eval_ckpt(root_result_dir, ckpt_dir):
 
     # create dataloader & network
     source_test_loader, target_test_loader = create_dataloader_da(logger)
-    model = GeneralizedPointRCNN(num_classes=source_test_loader.dataset.num_class, use_xyz=True, mode='TEST')
+    model = GeneralizedPointRCNN(num_classes=source_test_loader.dataset.num_class, use_xyz=True, mode='TRAIN')
     model.cuda()
 
     # copy important files to backup
