@@ -154,6 +154,7 @@ def eval_one_epoch_rpn(model, dataloader, epoch_id, result_dir, logger):
 
         inputs = torch.from_numpy(pts_input).cuda(non_blocking=True).float()
         input_data = {'pts_input': inputs}
+        ipdb.set_trace()
 
         # model inference
         ret_dict = model(input_data)
