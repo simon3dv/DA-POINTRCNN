@@ -151,7 +151,6 @@ def eval_one_epoch_rpn(model, dataloader, epoch_id, result_dir, logger):
                 # logger.info('%06d: No gt box' % sample_id)
             else:
                 gt_boxes3d = torch.from_numpy(gt_boxes3d).cuda(non_blocking=True).float()
-        ipdb.set_trace()
         inputs = torch.from_numpy(pts_input).cuda(non_blocking=True).float()
         input_data = {'pts_input': inputs}
 
@@ -490,6 +489,7 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
         sample_id, pts_rect, pts_features, pts_input = \
             data['sample_id'], data['pts_rect'], data['pts_features'], data['pts_input']
         batch_size = len(sample_id)
+        ipdb.set_trace()
         inputs = torch.from_numpy(pts_input).cuda(non_blocking=True).float()
         input_data = {'pts_input': inputs}
 
