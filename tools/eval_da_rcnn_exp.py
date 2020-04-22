@@ -489,9 +489,8 @@ def eval_one_epoch_joint(model, dataloader, epoch_id, result_dir, logger):
         sample_id, pts_rect, pts_features, pts_input = \
             data['sample_id'], data['pts_rect'], data['pts_features'], data['pts_input']
         batch_size = len(sample_id)
-        ipdb.set_trace()
         inputs = torch.from_numpy(pts_input).cuda(non_blocking=True).float()
-        input_data = {'pts_input': inputs}
+        input_data = {'pts_input': inputs, 'is_source':data['is_source']} # add is_source
 
         # model inference
         ret_dict = model(input_data)
