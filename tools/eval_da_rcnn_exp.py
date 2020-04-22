@@ -864,7 +864,7 @@ def create_dataloader(logger):
     DATA_PATH = os.path.join('..', 'data')
 
     # create dataloader
-    test_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode=mode,
+    test_set = nuscenes2kittiRCNNDataset(root_dir=DATA_PATH, npoints=cfg.RPN.NUM_POINTS, split=cfg.TEST.SPLIT, mode='EVAL',
                                 random_select=args.random_select,
                                 rcnn_eval_roi_dir=args.rcnn_eval_roi_dir,
                                 rcnn_eval_feature_dir=args.rcnn_eval_feature_dir,
