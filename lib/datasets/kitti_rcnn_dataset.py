@@ -126,7 +126,7 @@ class KittiRCNNDataset(KittiDataset):
             choose = np.random.choice(pts.shape[0], int(pts.shape[0]/2), replace=False)
             pts = pts[choose,:]
         elif cfg.DA.INPUT_DELETE:#even
-            choose = np.arange(0,pts.shape[0],2])
+            choose = np.arange(0,pts.shape[0],2)
             random.shuffle(choose)
             pts = pts[choose,:]
         return pts
