@@ -122,8 +122,12 @@ class KittiRCNNDataset(KittiDataset):
         lidar_file = os.path.join(self.lidar_dir, '%06d.bin' % idx)
         assert os.path.exists(lidar_file)
         pts = np.fromfile(lidar_file, dtype=np.float32).reshape(-1, 4)
-        if cfg.DA.INPUT_DROPOUT:
+        if cfg.DA.INPUT_DROPOUT:#random
             choose = np.random.choice(pts.shape[0], int(pts.shape[0]/2), replace=False)
+            pts = pts[choose,:]
+        elif cfg.DA.INPUT_DELETE:#even
+            choose = np.arange(0,pts.shape[0,2])
+            random.shuffle(choose)
             pts = pts[choose,:]
         return pts
 

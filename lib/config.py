@@ -141,6 +141,8 @@ __C.RCNN.NMS_THRESH = 0.1
 __C.DA = edict()
 __C.DA.ENABLED = False
 __C.DA.INPUT_DROPOUT = False
+__C.DA.INPUT_DELETE = False
+__C.DA.INPUT_DELETE_FV = False
 
 __C.DA.DA_IMG = edict()
 __C.DA.DA_IMG.ENABLED = False
