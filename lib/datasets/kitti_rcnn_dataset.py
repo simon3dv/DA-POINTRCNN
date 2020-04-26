@@ -10,6 +10,7 @@ import lib.utils.kitti_utils as kitti_utils
 import lib.utils.roipool3d.roipool3d_utils as roipool3d_utils
 from lib.config import cfg
 import ipdb
+import random
 
 class KittiRCNNDataset(KittiDataset):
     def __init__(self, root_dir, npoints=16384, split='train', classes='Car', mode='TRAIN', random_select=True,
