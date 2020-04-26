@@ -66,6 +66,4 @@ class Pointnet2MSG(nn.Module):
                 l_xyz[i - 1], l_xyz[i], l_features[i - 1], l_features[i]
             )
 
-        import ipdb
-        ipdb.set_trace()
         return l_xyz[0], l_features[0]
