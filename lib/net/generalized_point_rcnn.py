@@ -96,7 +96,7 @@ class da_rpn(torch.nn.Module):
         #self.inshead = DAInsHead(num_ins_inputs)
         #self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
 
-        self.avgpool = torch.nn.AvgPool1d(128)
+        self.avgpool = torch.nn.AvgPool1d(128, 1)
     def forward(self, img_features):
         """
         Arguments:
