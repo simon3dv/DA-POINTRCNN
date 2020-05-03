@@ -113,7 +113,7 @@ def model_joint_fn_decorator():
         da_img = da_img.squeeze() # B, N or B, 1
         da_img_labels = torch.zeros(da_img.shape).cuda()
         mask = np.where(is_source)[0]
-        da_img_labels[mask,:] = 1
+        da_img_labels[mask,...] = 1
         da_rpn_loss = F.binary_cross_entropy(torch.sigmoid(da_img.view(-1)), da_img_labels.view(-1))
         da_rpn_loss = da_rpn_loss
         tb_dict['da_rpn_loss'] = da_rpn_loss.item()
