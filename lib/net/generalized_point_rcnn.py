@@ -109,8 +109,6 @@ class da_rpn(torch.nn.Module):
         if cfg.DA.DA_IMG.POOL:
             img_features = self.avgpool(img_features)
         img_grl_fea = self.grl_img(img_features) #B, 128, 1 or N
-        print(img_grl_fea.shape)
-        ipdb.set_trace()
         da_img_features = self.imghead(img_grl_fea)
 
         #if self.resnet_backbone:
