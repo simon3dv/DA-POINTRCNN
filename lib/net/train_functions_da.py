@@ -73,7 +73,6 @@ def model_joint_fn_decorator():
             disp_dict['rpn_loss'] = rpn_loss.item()
 
         if cfg.RCNN.ENABLED:
-
             n_roi = cfg.RCNN.ROI_PER_IMAGE
             is_source_for_rois = np.repeat(data['is_source'][:,np.newaxis],n_roi,axis=1).reshape(-1)
             domain_mask_for_rois = np.where(is_source_for_rois == True)[0]
@@ -108,10 +107,10 @@ def model_joint_fn_decorator():
 
     def get_da_rpn_loss(da_img, is_source, tb_dict):
         """
-        :param da_img: B,1,N
+        :param da_img: B,1,N or B,1,1(with avg_pool)
         :param is_source: B,
         """
-        da_img = da_img.squeeze() # B, N
+        da_img = da_img.squeeze() # B, N or B, 1
         da_img_labels = torch.zeros(da_img.shape).cuda()
         mask = np.where(is_source)[0]
         da_img_labels[mask,:] = 1

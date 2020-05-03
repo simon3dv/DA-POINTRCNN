@@ -105,15 +105,20 @@ class da_rpn(torch.nn.Module):
             losses (dict[Tensor]): the losses for the model during training. During
                 testing, it is an empty dict.
         """
+        if DA.DA_IMG.POOL:
+            img_features = self.avgpool(img_features)
+        img_grl_fea = self.grl_img(img_features) #B, 128, 1 or N
+        da_img_features = self.imghead(img_grl_fea)
+
         #if self.resnet_backbone:
         #    da_ins_feature = self.avgpool(da_ins_feature)
         #da_ins_feature = da_ins_feature.view(da_ins_feature.size(0), -1)
-        img_grl_fea = self.grl_img(img_features) #B, 128, N
+        #img_grl_fea = self.grl_img(img_features) #B, 128, N
         #ins_grl_fea = self.grl_ins(da_ins_feature)
         #img_grl_consist_fea = [self.grl_img_consist(fea) for fea in img_features]
         #ins_grl_consist_fea = self.grl_ins_consist(da_ins_feature)
 
-        da_img_features = self.imghead(img_grl_fea) #B, 1, N
+        #da_img_features = self.imghead(img_grl_fea) #B, 1, N
         #da_ins_features = self.inshead(ins_grl_fea)
         #da_img_consist_features = self.imghead(img_grl_consist_fea)
         #da_ins_consist_features = self.inshead(ins_grl_consist_fea)
