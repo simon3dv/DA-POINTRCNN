@@ -169,8 +169,8 @@ class da_rcnn(torch.nn.Module):
         ipdb.set_trace()
         if cfg.DA.DA_INS.RESHAPE:
             B = round(ins_grl_fea.shape[0]/64)
-            ins_grl_fea = ins_grl_fea.reshape(B, -1)
-        da_ins_features = self.inshead(ins_grl_fea) #[128, 1, 1]
+            ins_grl_fea = ins_grl_fea.reshape(B, -1, 1)
+        da_ins_features = self.inshead(ins_grl_fea) #[B*64, 1, 1]
         """
         if self.training:
             da_img_loss = F.binary_cross_entropy_with_logits(
