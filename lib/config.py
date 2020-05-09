@@ -167,7 +167,7 @@ __C.DA.DA_INS = edict()
 __C.DA.DA_INS.ENABLED = False
 __C.DA.DA_INS.GRL_WEIGHT = 0.1
 __C.DA.DA_INS.LOSS_WEIGHT = 1.0
-__C.DA.DA_IMG.RESHAPE = False
+__C.DA.DA_INS.RESHAPE = False
 
 __C.DA.DA_CST = edict()
 __C.DA.DA_CST.ENABLED = False
