@@ -107,11 +107,10 @@ def model_joint_fn_decorator():
 
     def get_da_rpn_loss(da_img, is_source, tb_dict):
         """
-        :param da_img: B,1,N or B,1,1(with avg_pool) or B,
+        :param da_img: B,c,N or B,1,N(with avg_pool) or B,
         :param is_source: B,
         """
         da_img = da_img.squeeze() # B, N or B, 1
-        ipdb.set_trace()
         da_img_labels = torch.zeros(da_img.shape).cuda()
         mask = np.where(is_source)[0]
         da_img_labels[mask,...] = 1
