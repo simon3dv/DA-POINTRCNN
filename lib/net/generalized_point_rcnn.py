@@ -91,7 +91,8 @@ class da_rpn(torch.nn.Module):
         #self.grl_ins_consist = GradientScalarLayer(1.0 * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
 
         in_channels = 128#cfg.MODEL.BACKBONE.OUT_CHANNELS
-
+        if cfg.DA.DA_IMG.RESHAPE:
+            in_channels *= cfg.RPN.NUM_POINTS
         self.imghead = DAImgHead(in_channels)
         #self.inshead = DAInsHead(num_ins_inputs)
         #self.loss_evaluator = make_da_heads_loss_evaluator(cfg)
@@ -106,11 +107,10 @@ class da_rpn(torch.nn.Module):
             losses (dict[Tensor]): the losses for the model during training. During
                 testing, it is an empty dict.
         """
-        ipdb.set_trace()
         if cfg.DA.DA_IMG.POOL:
-            img_features = self.avgpool(img_features)
+            img_features = self.avgpool(img_features) # B,128,1
         if cfg.DA.DA_IMG.RESHAPE:
-            img_features = img_features.reshape(img_features.shape[0], -1)
+            img_features = img_features.reshape(img_features.shape[0], -1) #B, 128*N
         img_grl_fea = self.grl_img(img_features)
         da_img_features = self.imghead(img_grl_fea)
 
@@ -152,7 +152,8 @@ class da_rcnn(torch.nn.Module):
         self.grl_ins = GradientScalarLayer(-1.0 * 0.1)
 
         num_ins_inputs = 512
-
+        if cfg.DA.DA_INS.RESHAPE:
+            num_ins_input *= 64
         self.inshead = DAInsHead(num_ins_inputs)
 
     def forward(self, ins_features):
@@ -165,6 +166,10 @@ class da_rcnn(torch.nn.Module):
                 testing, it is an empty dict.
         """
         ins_grl_fea = self.grl_ins(ins_features) #(B*64,512,1)
+        ipdb.set_trace()
+        if cfg.DA.DA_INS.RESHAPE:
+            B = round(ins_grl_fea.shape[0]/64)
+            ins_grl_fea = ins_grl_fea.reshape(B, -1)
         da_ins_features = self.inshead(ins_grl_fea) #[128, 1, 1]
         """
         if self.training:
