@@ -153,7 +153,7 @@ class da_rcnn(torch.nn.Module):
 
         num_ins_inputs = 512
         if cfg.DA.DA_INS.RESHAPE:
-            num_ins_input *= 64
+            num_ins_inputs *= 64
         self.inshead = DAInsHead(num_ins_inputs)
 
     def forward(self, ins_features):
