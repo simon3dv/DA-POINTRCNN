@@ -96,6 +96,8 @@ def model_joint_fn_decorator():
                 loss += da_rpn_loss * 1.0 # DA_IMG_LOSS_WEIGHT
                 disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
             if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
+                if cfg.DA.DA_INS.RESHAPE:
+                    is_source_for_rois = is_source
                 da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict)
                 loss += da_rcnn_loss * 0.1  # DA_INS_LOSS_WEIGHT
                 disp_dict['da_rcnn_loss'] = da_rcnn_loss.item() * 0.1
@@ -125,7 +127,6 @@ def model_joint_fn_decorator():
         :param da_ins:B*n_rois, 1, 1
         :param is_source_for_rois: B*n_rois,
         """
-        ipdb.set_trace()
         da_ins = da_ins.squeeze()
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
         da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
