@@ -166,7 +166,6 @@ class da_rcnn(torch.nn.Module):
                 testing, it is an empty dict.
         """
         ins_grl_fea = self.grl_ins(ins_features) #(B*64,512,1)
-        ipdb.set_trace()
         if cfg.DA.DA_INS.RESHAPE:
             B = round(ins_grl_fea.shape[0]/64)
             ins_grl_fea = ins_grl_fea.reshape(B, -1, 1)
