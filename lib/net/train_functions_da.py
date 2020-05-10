@@ -125,7 +125,8 @@ def model_joint_fn_decorator():
         :param da_ins:B*n_rois, 1, 1
         :param is_source_for_rois: B*n_rois,
         """
-        da_ins = da_ins.squeeze() # B,
+        ipdb.set_trace()
+        da_ins = da_ins.squeeze()
         da_ins_labels = torch.FloatTensor(is_source_for_rois).cuda()
         da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
