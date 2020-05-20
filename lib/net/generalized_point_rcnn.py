@@ -81,11 +81,11 @@ class da_rpn(torch.nn.Module):
             'V') else res2_out_channels * stage2_relative_factor
         """
 
-        self.img_weight = 1.0#cfg.DA.DA_IMG_LOSS_WEIGHT
+        #self.img_weight = 1.0#cfg.DA.DA_IMG_LOSS_WEIGHT
         #self.ins_weight = cfg.MODEL.DA_HEADS.DA_INS_LOSS_WEIGHT
         #self.cst_weight = cfg.MODEL.DA_HEADS.DA_CST_LOSS_WEIGHT
 
-        self.grl_img = GradientScalarLayer(-1.0 * 0.1) #self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
+        self.grl_img = GradientScalarLayer(-1.0 * cfg.DA.DA_IMG.GRL_WEIGHT) #self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
         #self.grl_ins = GradientScalarLayer(-1.0 * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
         #self.grl_img_consist = GradientScalarLayer(1.0 * self.cfg.MODEL.DA_HEADS.DA_IMG_GRL_WEIGHT)
         #self.grl_ins_consist = GradientScalarLayer(1.0 * self.cfg.MODEL.DA_HEADS.DA_INS_GRL_WEIGHT)
@@ -147,9 +147,9 @@ class da_rcnn(torch.nn.Module):
         super(da_rcnn, self).__init__()
 
         self.cfg = cfg
-        self.ins_weight = 1.0#cfg.MODEL.DA_HEADS.DA_INS_LOSS_WEIGHT
+        #self.ins_weight = 1.0#cfg.MODEL.DA_HEADS.DA_INS_LOSS_WEIGHT
 
-        self.grl_ins = GradientScalarLayer(-1.0 * 0.1)
+        self.grl_ins = GradientScalarLayer(-1.0 * cfg.DA.DA_INS.GRL_WEIGHT)
 
         num_ins_inputs = 512
         if cfg.DA.DA_INS.RESHAPE:
@@ -221,10 +221,10 @@ class GeneralizedPointRCNN(nn.Module):
                     output.update(da_rpn_output)
             """
             rpn_output:
-                rpn_cls: B,N,1
-                rpn_reg: B,N,76
-                backbone_xyz B,N,3
-                backbone_features: B,128,N
+                rpn_cls: B,N,1(Foreground Mask)
+                rpn_reg: B,N,76(3D RoIs)
+                backbone_xyz B,N,3(Point Coords)
+                backbone_features: B,128,N(Semantic Features)
             """
             # rcnn inference
             if cfg.RCNN.ENABLED:
