@@ -108,9 +108,7 @@ def model_joint_fn_decorator():
                 disp_dict['da_rcnn_acc'] = (da_rcnn_output.eq(torch.FloatTensor(is_source_for_rois).cuda())).float().mean().item()
                 tb_dict['da_rcnn_acc'] = disp_dict['da_rcnn_acc']
                 disp_dict['da_rcnn_num']=ret_dict['da_ins'].squeeze()
-                disp_dict['da_rcnn_loss']=ret_dict['da_ins'].squeeze()
-                for i in range(disp_dict.shape[0]):
-                    disp_dict['da_rcnn_loss'][i] = torch.sigmoid(ret_dict['da_ins'][i])
+                disp_dict['da_rcnn_loss']=show_item
 
 
             if cfg.DA.DA_CST.ENABLED:
