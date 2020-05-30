@@ -107,7 +107,7 @@ def model_joint_fn_decorator():
                 da_rcnn_output = (ret_dict['da_ins']>=0.0).squeeze()
                 disp_dict['da_rcnn_acc'] = (da_rcnn_output.eq(torch.FloatTensor(is_source_for_rois).cuda())).float().mean().item()
                 tb_dict['da_rcnn_acc'] = disp_dict['da_rcnn_acc']
-                disp_dict['da_rcnn_num']=ret_dict['da_ins']
+                disp_dict['da_rcnn_num']=ret_dict['da_ins'].squeeze()
 
             if cfg.DA.DA_CST.ENABLED:
                 pass
