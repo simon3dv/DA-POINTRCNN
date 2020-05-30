@@ -101,13 +101,17 @@ def model_joint_fn_decorator():
             if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
                 if cfg.DA.DA_INS.RESHAPE:
                     is_source_for_rois = is_source
-                da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict)
+                da_rcnn_loss, show_item = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict, show=True)
                 loss += da_rcnn_loss * cfg.DA.DA_INS.LOSS_WEIGHT  # DA_INS_LOSS_WEIGHT
                 disp_dict['da_rcnn_loss'] = da_rcnn_loss.item() * cfg.DA.DA_INS.LOSS_WEIGHT
                 da_rcnn_output = (ret_dict['da_ins']>=0.0).squeeze()
                 disp_dict['da_rcnn_acc'] = (da_rcnn_output.eq(torch.FloatTensor(is_source_for_rois).cuda())).float().mean().item()
                 tb_dict['da_rcnn_acc'] = disp_dict['da_rcnn_acc']
                 disp_dict['da_rcnn_num']=ret_dict['da_ins'].squeeze()
+                disp_dict['da_rcnn_loss']=ret_dict['da_ins'].squeeze()
+                for i in range(disp_dict.shape[0]):
+                    disp_dict['da_rcnn_loss'][i] = torch.sigmoid(ret_dict['da_ins'][i])
+
 
             if cfg.DA.DA_CST.ENABLED:
                 pass
@@ -130,7 +134,7 @@ def model_joint_fn_decorator():
         tb_dict.update({'da_rpn_loss': da_rpn_loss.item()})
         return da_rpn_loss
 
-    def get_da_rcnn_loss(da_ins, is_source_for_rois, tb_dict):
+    def get_da_rcnn_loss(da_ins, is_source_for_rois, tb_dict, show=False):
         """
         :param da_ins:B*n_rois, 1, 1
         :param is_source_for_rois: B*n_rois,
@@ -140,7 +144,11 @@ def model_joint_fn_decorator():
         da_rcnn_loss = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels)
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
         tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
-        return da_rcnn_loss
+        if show:
+            da_rcnn_loss_not_reduction = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels,reduction='none')
+            return da_rcnn_loss, da_rcnn_loss_not_reduction
+        else:
+            return da_rcnn_loss
 
     def get_rpn_loss(model, rpn_cls, rpn_reg, rpn_cls_label, rpn_reg_label, tb_dict):
         if isinstance(model, nn.DataParallel):
