@@ -96,16 +96,15 @@ def model_joint_fn_decorator():
                 loss += da_rpn_loss * cfg.DA.DA_IMG.LOSS_WEIGHT # DA_IMG_LOSS_WEIGHT
                 disp_dict['da_rpn_loss'] = da_rpn_loss.item()*1.0 # DA_IMG_LOSS_WEIGHT
                 da_rpn_output = (ret_dict['da_img']>=0.0).squeeze()
-                disp_dict['da_rpn_acc'] = (da_rpn_output.eq(is_source)).float().mean()
+                disp_dict['da_rpn_acc'] = (da_rpn_output.eq(torch.FloatTensor(is_source).cuda())).float().mean()
             if cfg.RCNN.ENABLED and cfg.DA.DA_INS.ENABLED:
                 if cfg.DA.DA_INS.RESHAPE:
                     is_source_for_rois = is_source
                 da_rcnn_loss = get_da_rcnn_loss(ret_dict['da_ins'], is_source_for_rois, tb_dict)
                 loss += da_rcnn_loss * cfg.DA.DA_INS.LOSS_WEIGHT  # DA_INS_LOSS_WEIGHT
                 disp_dict['da_rcnn_loss'] = da_rcnn_loss.item() * cfg.DA.DA_INS.LOSS_WEIGHT
-                ipdb.set_trace()
                 da_rcnn_output = (ret_dict['da_ins']>=0.0).squeeze()
-                disp_dict['da_rcnn_acc'] = (da_rcnn_output.eq(is_source_for_rois)).float().mean()
+                disp_dict['da_rcnn_acc'] = (da_rcnn_output.eq(torch.FloatTensor(is_source_for_rois).cuda())).float().mean()
 
             if cfg.DA.DA_CST.ENABLED:
                 pass
