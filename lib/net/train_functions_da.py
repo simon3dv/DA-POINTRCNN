@@ -143,7 +143,7 @@ def model_joint_fn_decorator():
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
         tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
         if show:
-            da_rcnn_loss_not_reduction = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels,reduction='none')
+            da_rcnn_loss_not_reduction = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels,reduce=False,reduction='none')
             return da_rcnn_loss, da_rcnn_loss_not_reduction
         else:
             return da_rcnn_loss
