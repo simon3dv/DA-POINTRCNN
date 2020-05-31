@@ -107,7 +107,7 @@ def model_joint_fn_decorator():
                 da_rcnn_output = (ret_dict['da_ins']>=0.0).squeeze()
                 disp_dict['da_rcnn_acc'] = (da_rcnn_output.eq(torch.FloatTensor(is_source_for_rois).cuda())).float().mean().item()
                 tb_dict['da_rcnn_acc'] = disp_dict['da_rcnn_acc']
-                disp_dict['da_rcnn_num']=ret_dict['da_ins'].squeeze().detach().data()
+                disp_dict['da_rcnn_num']=ret_dict['da_ins'].squeeze().detach().cpu()
                 disp_dict['da_rcnn_loss']=show_item
 
 
@@ -143,9 +143,8 @@ def model_joint_fn_decorator():
         tb_dict['da_rcnn_loss'] = da_rcnn_loss.item()
         tb_dict.update({'da_rcnn_loss': da_rcnn_loss.item()})
         if show:
-            ipdb.set_trace()
             da_rcnn_loss_not_reduction = F.binary_cross_entropy(torch.sigmoid(da_ins), da_ins_labels,reduce=False,reduction='none')
-            return da_rcnn_loss, da_rcnn_loss_not_reduction.detach().data()
+            return da_rcnn_loss, da_rcnn_loss_not_reduction.detach().cpu()
         else:
             return da_rcnn_loss
 
