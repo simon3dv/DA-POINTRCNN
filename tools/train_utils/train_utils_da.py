@@ -222,6 +222,7 @@ class Trainer(object):
                 for cur_it, (source_batch, target_batch) in enumerate(zip(source_train_loader, target_train_loader)):
 
                     batch = [source_batch, target_batch]
+                    import ipdb
                     ipdb.set_trace()
                     batch = {}
                     for key, value in source_batch.items():
