@@ -221,29 +221,36 @@ class Trainer(object):
                 # train one epoch
                 for cur_it, (source_batch, target_batch) in enumerate(zip(source_train_loader, target_train_loader)):
 
-                    batch = [source_batch, target_batch]
                     import ipdb
                     ipdb.set_trace()
                     batch = {}
+                    batch_size = source_batch['sample_id'].shape[0]
+                    id_list = np.arange(batch_size*2)
+                    random.shuffle(id_list)
+
                     for key, value in source_batch.items():
                         if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
                                 (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
                             max_gt = 0
-                            batch_size = value.shape[0]
-                            for k in range(batch_size):
-                                max_gt = max(max_gt, source_batch[key][k].__len__())
-                                max_gt = max(max_gt, target_batch[key][k].__len__())
+                            for k in range(batch_size*2):
+                                if id_list[k]<batch_size:
+                                    max_gt = max(max_gt, source_batch[key][id_list[k]].__len__())
+                                else:
+                                    max_gt = max(max_gt, target_batch[key][id_list[k]-batch_size].__len__())
                             batch_gt_boxes3d = np.zeros((batch_size*2, max_gt, 7), dtype=np.float32)
-                            for i in range(batch_size):
-                                batch_gt_boxes3d[i, :source_batch[key][i].__len__(), :] = source_batch[key][i]
-                            for i in range(batch_size,batch_size*2):
-                                batch_gt_boxes3d[i, :target_batch[key][i-batch_size].__len__(), :] = target_batch[key][i-batch_size]
+                            for k in range(batch_size*2):
+                                if id_list[k]<batch_size:
+                                    batch_gt_boxes3d[k, :source_batch[key][id_list[k]].__len__(), :] = source_batch[key][id_list[k]]
+                                else:
+                                    batch_gt_boxes3d[k, :target_batch[key][id_list[k]-batch_size].__len__(), :] = target_batch[key][id_list[k]-batch_size]
                             batch[key] = batch_gt_boxes3d
                         elif type(value) == np.ndarray:
-                            batch[key] = np.concatenate([source_batch[key], target_batch[key]], 0)
+                            batch[key] = np.concatenate([source_batch[key], target_batch[key]], 0)[id_list,...]
                         elif type(value) == list:
-                            batch[key] = source_batch[key] + target_batch[key]
-
+                            batch[key] = []
+                            tmp = source_batch[key] + target_batch[key]
+                            for k in range(batch_size*2)
+                                batch[key].append(tmp[k])
                     if lr_scheduler_each_iter:
                         self.lr_scheduler.step(it)
                         cur_lr = float(self.optimizer.lr)
