@@ -249,6 +249,7 @@ class Trainer(object):
                             tmp = source_batch[key] + target_batch[key]
                             for k in range(batch_size*2):
                                 batch[key].append(tmp[k])
+                    ipdb.set_trace()
                     if lr_scheduler_each_iter:
                         self.lr_scheduler.step(it)
                         cur_lr = float(self.optimizer.lr)
