@@ -246,7 +246,7 @@ class Trainer(object):
                         elif type(value) == list:
                             batch[key] = []
                             tmp = source_batch[key] + target_batch[key]
-                            for k in range(batch_size*2)
+                            for k in range(batch_size*2):
                                 batch[key].append(tmp[k])
                     if lr_scheduler_each_iter:
                         self.lr_scheduler.step(it)
