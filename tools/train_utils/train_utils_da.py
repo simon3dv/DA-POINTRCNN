@@ -7,6 +7,7 @@ import tqdm
 import torch.optim.lr_scheduler as lr_sched
 import math
 import numpy as np
+import random
 
 logging.getLogger(__name__).addHandler(logging.StreamHandler())
 cur_logger = logging.getLogger(__name__)
