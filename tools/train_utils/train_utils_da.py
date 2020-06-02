@@ -220,9 +220,6 @@ class Trainer(object):
 
                 # train one epoch
                 for cur_it, (source_batch, target_batch) in enumerate(zip(source_train_loader, target_train_loader)):
-
-                    import ipdb
-                    ipdb.set_trace()
                     batch = {}
                     batch_size = source_batch['sample_id'].shape[0]
                     id_list = np.arange(batch_size*2)
