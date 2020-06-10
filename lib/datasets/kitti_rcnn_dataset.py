@@ -165,6 +165,8 @@ class KittiRCNNDataset(KittiDataset):
         else:
             rpn_seg_file = os.path.join(rpn_feature_dir, '%06d_seg.npy' % idx)
             rpn_seg_score = np.load(rpn_seg_file).reshape(-1)
+        import ipdb
+        ipdb.set_trace()
         return np.load(rpn_xyz_file), np.load(rpn_feature_file), np.load(rpn_intensity_file).reshape(-1), rpn_seg_score
 
     def filtrate_objects(self, obj_list):
