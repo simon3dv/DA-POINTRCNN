@@ -206,6 +206,8 @@ class GeneralizedPointRCNN(nn.Module):
             self.da_rpn = da_rpn(cfg)
             self.da_rcnn = da_rcnn(cfg)
     def forward(self, input_data):
+        import ipdb
+        ipdb.set_trace()
         if cfg.RPN.ENABLED:
             output = {}
             # rpn inference
@@ -235,7 +237,7 @@ class GeneralizedPointRCNN(nn.Module):
                     rpn_scores_raw = rpn_cls[:, :, 0]
                     rpn_scores_norm = torch.sigmoid(rpn_scores_raw)
                     seg_mask = (rpn_scores_norm > cfg.RPN.SCORE_THRESH).float()
-                    pts_depth = torch.norm(backbone_xyz, p=2, dim=2)
+                    pts_depth = torch.norm(backbone_xyz, p=2, dim=2) # distance, sqrt(x**2+y**2+z**2)
 
                     # proposal layer
                     rois, roi_scores_raw = self.rpn.proposal_layer(rpn_scores_raw, rpn_reg, backbone_xyz)  # (B, M, 7)
