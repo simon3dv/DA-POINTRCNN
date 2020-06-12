@@ -387,6 +387,8 @@ class KittiRCNNDataset(KittiDataset):
         sample_info['gt_boxes3d'] = aug_gt_boxes3d
 
 
+        import ipdb
+        ipdb.set_trace()
         return sample_info
 
     @staticmethod
@@ -983,8 +985,6 @@ class KittiRCNNDataset(KittiDataset):
         gt_of_rois = np.concatenate(roi_gt_list, axis=0)
 
         # collect extra features for point cloud pooling
-        import ipdb
-        ipdb.set_trace()
         if cfg.RCNN.USE_INTENSITY:
             pts_extra_input_list = [rpn_intensity.reshape(-1, 1), seg_mask.reshape(-1, 1)]
         else:
