@@ -24,7 +24,7 @@ RPN:
     FIXED: False
 
     # config of input
-    USE_INTENSITY: False
+    USE_INTENSITY: True
 
     # config of bin-based loss
     LOC_XZ_FINE: True
