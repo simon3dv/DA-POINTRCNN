@@ -387,8 +387,6 @@ class KittiRCNNDataset(KittiDataset):
         sample_info['gt_boxes3d'] = aug_gt_boxes3d
 
 
-        import ipdb
-        ipdb.set_trace()
         return sample_info
 
     @staticmethod
