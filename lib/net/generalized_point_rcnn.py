@@ -206,8 +206,13 @@ class GeneralizedPointRCNN(nn.Module):
             self.da_rpn = da_rpn(cfg)
             self.da_rcnn = da_rcnn(cfg)
     def forward(self, input_data):
-        import ipdb
-        ipdb.set_trace()
+        """
+        :param input_data:dict
+            pts_input:B,16384,3
+            gt_boxes3d:B,14(?),7
+            is_source:B*2,
+        :return:
+        """
         if cfg.RPN.ENABLED:
             output = {}
             # rpn inference
