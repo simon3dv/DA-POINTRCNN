@@ -221,12 +221,23 @@ class Trainer(object):
 
                 # train one epoch
                 for cur_it, (source_batch, target_batch) in enumerate(zip(source_train_loader, target_train_loader)):
+                    """
+                    source_batch:
+                        sample_id: B,
+                        random_select:B,
+                        aug_method:[[ ['rotation',float], ['scaling',float] ]]
+                        is_source:B,
+                        pts_input: B,16384,3
+                        pts_rect: B,16384,3
+                        pts_features: B,16384,1
+                        rpn_cls_label: B,16384
+                        rpn_reg_label:B,16384,7
+                        gt_boxes3d:
+                    """
                     batch = {}
                     batch_size = source_batch['sample_id'].shape[0]
                     id_list = np.arange(batch_size*2)
                     random.shuffle(id_list)
-                    import ipdb
-                    ipdb.set_trace()
                     for key, value in source_batch.items():
                         if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
                                 (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):
@@ -263,6 +274,8 @@ class Trainer(object):
                         else:
                             cur_lr = self.lr_scheduler.get_lr()[0]
 
+                    import ipdb
+                    ipdb.set_trace()
                     loss, tb_dict, disp_dict = self._train_it(batch)
                     it += 1
 
