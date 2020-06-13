@@ -116,6 +116,7 @@ class RCNNNet(nn.Module):
         :param input_data: input dict
         :return:
         """
+        ipdb.set_trace()
         if cfg.RCNN.ROI_SAMPLE_JIT:
             if self.training:
                 with torch.no_grad():
@@ -143,6 +144,9 @@ class RCNNNet(nn.Module):
 
                 if cfg.RCNN.USE_DEPTH:
                     pts_depth = input_data['pts_depth'] / 70.0 - 0.5
+                    if cfg.RCNN.USE_MAX_DENSITY:
+                        max_depth = 40.0
+                        pts_depth = input_data['pts_depth'] / max_depth - 0.5
                     pts_extra_input_list.append(pts_depth.unsqueeze(dim=2))
                 pts_extra_input = torch.cat(pts_extra_input_list, dim=2)
 
