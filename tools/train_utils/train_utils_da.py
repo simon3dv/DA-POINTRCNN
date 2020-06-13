@@ -225,7 +225,8 @@ class Trainer(object):
                     batch_size = source_batch['sample_id'].shape[0]
                     id_list = np.arange(batch_size*2)
                     random.shuffle(id_list)
-
+                    import ipdb
+                    ipdb.set_trace()
                     for key, value in source_batch.items():
                         if cfg.RPN.ENABLED and key == 'gt_boxes3d' or \
                                 (cfg.RCNN.ENABLED and cfg.RCNN.ROI_SAMPLE_JIT and key in ['gt_boxes3d', 'roi_boxes3d']):

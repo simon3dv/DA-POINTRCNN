@@ -68,10 +68,11 @@ class RPN(nn.Module):
         nn.init.normal_(self.rpn_reg_layer[-1].conv.weight, mean=0, std=0.001)
 
     def forward(self, input_data):
-        import ipdb
-        ipdb.set_trace()
         """
         :param input_data: dict (point_cloud)
+            pts_input:B,16384,3(may be more, intensity, density)
+            gt_boxes3d:B,14(?),7
+            is_source:B*2,
         :return:
         """
         pts_input = input_data['pts_input']
