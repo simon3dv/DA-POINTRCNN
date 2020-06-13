@@ -268,7 +268,7 @@ class KittiRCNNDataset(KittiDataset):
             # img = self.get_image(sample_id)
             img_shape = self.get_image_shape(sample_id)
             pts_lidar = self.get_lidar(sample_id)
-
+            ipdb.set_trace()
             # get valid point (projected points should be in image)
             pts_rect = calib.lidar_to_rect(pts_lidar[:, 0:3])
             pts_intensity = pts_lidar[:, 3]
