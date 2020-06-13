@@ -132,6 +132,7 @@ class RCNNNet(nn.Module):
                 """
                 pts_input = torch.cat((target_dict['sampled_pts'], target_dict['pts_feature']), dim=2)
                 target_dict['pts_input'] = pts_input
+                ipdb.set_trace()
             else:
                 rpn_xyz, rpn_features = input_data['rpn_xyz'], input_data['rpn_features']
                 batch_rois = input_data['roi_boxes3d']
@@ -140,7 +141,7 @@ class RCNNNet(nn.Module):
                                             input_data['seg_mask'].unsqueeze(dim=2)]
                 else:
                     pts_extra_input_list = [input_data['seg_mask'].unsqueeze(dim=2)]
-
+                ipdb.set_trace()
                 if cfg.RCNN.USE_DEPTH:
                     pts_depth = input_data['pts_depth'] / 70.0 - 0.5
                     if cfg.RCNN.USE_MAX_DENSITY and cfg.DA.INS.ENABLED:
