@@ -341,11 +341,12 @@ class KittiRCNNDataset(KittiDataset):
             ret_pts_intensity = pts_intensity - 0.5
 
         pts_features = [ret_pts_intensity.reshape(-1, 1)]
-        ipdb.set_trace()
         if cfg.RPN.USE_MAX_DENSITY:
-            pts_features += pts_max_density.reshape(-1,1)
+            pts_max_density = pts_max_density[choice]
+            pts_features.append(pts_max_density.reshape(-1,1))
 
         ret_pts_features = np.concatenate(pts_features, axis=1) if pts_features.__len__() > 1 else pts_features[0]
+        ipdb.set_trace()
 
         sample_info = {'sample_id': sample_id, 'random_select': self.random_select}
 
