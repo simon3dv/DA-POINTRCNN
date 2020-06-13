@@ -257,6 +257,7 @@ class Trainer(object):
                                     batch_gt_boxes3d[k, :target_batch[key][id-batch_size].__len__(), :] = target_batch[key][id-batch_size]
                             batch[key] = batch_gt_boxes3d
                         elif type(value) == np.ndarray:
+                            import ipdb
                             ipdb.set_trace()
                             batch[key] = np.concatenate([source_batch[key], target_batch[key]], 0)[id_list,...]
                         elif type(value) == list:
