@@ -840,7 +840,6 @@ class KittiRCNNDataset(KittiDataset):
                            'roi_boxes3d': roi_boxes3d,
                            'roi_scores': roi_scores,
                            'pts_depth': np.linalg.norm(rpn_xyz, ord=2, axis=1)}
-            ipdb.set_trace()
             if self.mode != 'TEST':
                 gt_obj_list = self.filtrate_objects(self.get_label(sample_id))
                 gt_boxes3d = kitti_utils.objs_to_boxes3d(gt_obj_list)
