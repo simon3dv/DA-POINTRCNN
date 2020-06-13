@@ -314,13 +314,19 @@ class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
             ret_pts_intensity = pts_intensity - 0.5
 
         pts_features = [ret_pts_intensity.reshape(-1, 1)]
+        if cfg.RPN.USE_MAX_DENSITY:#(add USE_MAX_DENSITY 2020.6.13)
+            pts_max_density = pts_max_density[choice]
+            pts_features.append(pts_max_density.reshape(-1,1))
+
         ret_pts_features = np.concatenate(pts_features, axis=1) if pts_features.__len__() > 1 else pts_features[0]
 
         sample_info = {'sample_id': sample_id, 'random_select': self.random_select}
 
-        if self.mode == 'TEST':
+        if self.mode == 'TEST':#(add USE_MAX_DENSITY 2020.6.13)
             if cfg.RPN.USE_INTENSITY:
-                pts_input = np.concatenate((ret_pts_rect, ret_pts_features), axis=1)  # (N, C)
+                pts_input = np.concatenate((ret_pts_rect, ret_pts_features[:, 0].reshape(-1,1)), axis=1)  # (N, C)
+            elif cfg.RPN.USE_MAX_DENSITY:
+                pts_input = np.concatenate((ret_pts_rect, ret_pts_features[:, 1].reshape(-1,1)), axis=1)  # (N, C)
             else:
                 pts_input = ret_pts_rect
             sample_info['pts_input'] = pts_input
@@ -345,9 +351,11 @@ class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
                                                                               sample_id)
             sample_info['aug_method'] = aug_method
 
-        # prepare input
+        # prepare input(add USE_MAX_DENSITY 2020.6.13)
         if cfg.RPN.USE_INTENSITY:
-            pts_input = np.concatenate((aug_pts_rect, ret_pts_features), axis=1)  # (N, C)
+            pts_input = np.concatenate((aug_pts_rect, ret_pts_features[:, 0].reshape(-1,1)), axis=1)  # (N, C)
+        elif cfg.RPN.USE_MAX_DENSITY:
+            pts_input = np.concatenate((aug_pts_rect, ret_pts_features[:, 1].reshape(-1,1)), axis=1)  # (N, C)
         else:
             pts_input = aug_pts_rect
 
