@@ -864,6 +864,7 @@ class KittiRCNNDataset(KittiDataset):
 
         if cfg.RCNN.USE_DEPTH:
             cur_depth = np.linalg.norm(pts_rect, axis=1, ord=2)
+            ipdb.set_trace()
             cur_depth_norm = (cur_depth / 70.0) - 0.5
             pts_extra_input_list.append(cur_depth_norm.reshape(-1, 1))
 
