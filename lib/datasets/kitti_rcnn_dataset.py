@@ -297,8 +297,6 @@ class KittiRCNNDataset(KittiDataset):
             dh_range_nuscenes = 40
             pts_depth = np.linalg.norm(pts_rect, axis=1, ord=2)
             pts_max_density = 1.0/pts_rect[:,2]**2 #1/dh, 1/dw
-            ipdb.set_trace()
-            pts_max_density = pts_max_density[pts_valid_flag]
 
         if cfg.GT_AUG_ENABLED and self.mode == 'TRAIN':
             # all labels for checking overlapping
