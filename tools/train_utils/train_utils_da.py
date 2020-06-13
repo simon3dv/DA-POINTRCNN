@@ -274,8 +274,6 @@ class Trainer(object):
                         else:
                             cur_lr = self.lr_scheduler.get_lr()[0]
 
-                    import ipdb
-                    ipdb.set_trace()
                     loss, tb_dict, disp_dict = self._train_it(batch)
                     it += 1
 
