@@ -16,7 +16,7 @@ class RPN(nn.Module):
         self.training_mode = (mode == 'TRAIN')
 
         MODEL = importlib.import_module(cfg.RPN.BACKBONE)
-        self.backbone_net = MODEL.get_model(input_channels=int(cfg.RPN.USE_INTENSITY), use_xyz=use_xyz)
+        self.backbone_net = MODEL.get_model(input_channels=int(cfg.RPN.USE_INTENSITY)+int(cfg.RPN.USE_MAX_DENSITY), use_xyz=use_xyz)
 
         # classification branch
         cls_layers = []
