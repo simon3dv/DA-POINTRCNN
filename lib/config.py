@@ -37,6 +37,8 @@ __C.RPN.ENABLED = True
 __C.RPN.FIXED = False
 
 __C.RPN.USE_INTENSITY = True
+__C.RPN.USE_DENSITY = False
+__C.RPN.USE_MAX_DENSITY = False
 
 # config of bin-based loss
 __C.RPN.LOC_XZ_FINE = False
@@ -85,6 +87,8 @@ __C.RCNN.USE_RPN_FEATURES = True
 __C.RCNN.USE_MASK = True
 __C.RCNN.MASK_TYPE = 'seg'
 __C.RCNN.USE_INTENSITY = False
+__C.RCNN.USE_DENSITY = False
+__C.RCNN.USE_MAX_DENSITY = False
 __C.RCNN.USE_DEPTH = True
 __C.RCNN.USE_SEG_SCORE = False
 __C.RCNN.ROI_SAMPLE_JIT = False
