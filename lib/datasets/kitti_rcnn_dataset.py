@@ -268,7 +268,7 @@ class KittiRCNNDataset(KittiDataset):
             # img = self.get_image(sample_id)
             img_shape = self.get_image_shape(sample_id)
             pts_lidar = self.get_lidar(sample_id)
-            ipdb.set_trace()
+
             # get valid point (projected points should be in image)
             pts_rect = calib.lidar_to_rect(pts_lidar[:, 0:3])
             pts_intensity = pts_lidar[:, 3]
@@ -282,11 +282,22 @@ class KittiRCNNDataset(KittiDataset):
             aug_pts = np.fromfile(pts_file, dtype=np.float32).reshape(-1, 4)
             pts_rect, pts_intensity = aug_pts[:, 0:3], aug_pts[:, 3]
 
+
         pts_img, pts_rect_depth = calib.rect_to_img(pts_rect)
         pts_valid_flag = self.get_valid_flag(pts_rect, pts_img, pts_rect_depth, img_shape)
 
         pts_rect = pts_rect[pts_valid_flag][:, 0:3]
         pts_intensity = pts_intensity[pts_valid_flag]
+
+        if cfg.RPN.USE_MAX_DENSITY:
+            dw_kitti = 0.08
+            dh_kitti = 0.4
+            dw_nuscenes = 0.16# 0.1~0.4 ,5~20Hz
+            dh_nuscenes = 1.33
+            dh_range_nuscenes = 40
+            pts_depth = np.linalg.norm(pts_rect, axis=1, ord=2)
+            pts_max_density = 1.0/pts_rect[:,2]**2 #1/dh, 1/dw
+            pts_max_density = pts_max_density[pts_valid_flag]
 
         if cfg.GT_AUG_ENABLED and self.mode == 'TRAIN':
             # all labels for checking overlapping
@@ -331,6 +342,10 @@ class KittiRCNNDataset(KittiDataset):
             ret_pts_intensity = pts_intensity - 0.5
 
         pts_features = [ret_pts_intensity.reshape(-1, 1)]
+        ipdb.set_trace()
+        if cfg.RPN.USE_MAX_DENSITY:
+            pts_features += pts_max_density.reshape(-1,1)
+
         ret_pts_features = np.concatenate(pts_features, axis=1) if pts_features.__len__() > 1 else pts_features[0]
 
         sample_info = {'sample_id': sample_id, 'random_select': self.random_select}
