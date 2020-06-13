@@ -346,13 +346,14 @@ class KittiRCNNDataset(KittiDataset):
             pts_features.append(pts_max_density.reshape(-1,1))
 
         ret_pts_features = np.concatenate(pts_features, axis=1) if pts_features.__len__() > 1 else pts_features[0]
-        ipdb.set_trace()
 
         sample_info = {'sample_id': sample_id, 'random_select': self.random_select}
 
         if self.mode == 'TEST':
             if cfg.RPN.USE_INTENSITY:
-                pts_input = np.concatenate((ret_pts_rect, ret_pts_features), axis=1)  # (N, C)
+                pts_input = np.concatenate((ret_pts_rect, ret_pts_features[:, 0].reshape(-1,1)), axis=1)  # (N, C)
+            elif cfg.RPN.USE_MAX_DENSITY:
+                pts_input = np.concatenate((ret_pts_rect, ret_pts_features[:, 1].reshape(-1,1)), axis=1)  # (N, C)
             else:
                 pts_input = ret_pts_rect
             sample_info['pts_input'] = pts_input
@@ -378,10 +379,12 @@ class KittiRCNNDataset(KittiDataset):
 
         # prepare input
         if cfg.RPN.USE_INTENSITY:
-            pts_input = np.concatenate((aug_pts_rect, ret_pts_features), axis=1)  # (N, C)
+            pts_input = np.concatenate((aug_pts_rect, ret_pts_features[:, 0].reshape(-1,1)), axis=1)  # (N, C)
+        elif cfg.RPN.USE_MAX_DENSITY:
+            pts_input = np.concatenate((aug_pts_rect, ret_pts_features[:, 1].reshape(-1,1)), axis=1)  # (N, C)
         else:
             pts_input = aug_pts_rect
-
+        ipdb.set_trace()
         sample_info['is_source'] = True if self.is_source else False
 
         if cfg.RPN.FIXED:
