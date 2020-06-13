@@ -277,6 +277,15 @@ class nuscenes2kittiRCNNDataset(nuscenes2kittiDataset):
         pts_rect = pts_rect[pts_valid_flag][:, 0:3]
         pts_intensity = pts_intensity[pts_valid_flag]
 
+        if cfg.RPN.USE_MAX_DENSITY:#(add USE_MAX_DENSITY 2020.6.13)
+            dw_kitti = 0.08
+            dh_kitti = 0.4
+            dw_nuscenes = 0.16# 0.1~0.4 ,5~20Hz
+            dh_nuscenes = 1.33
+            dh_range_nuscenes = 40
+            pts_depth = np.linalg.norm(pts_rect, axis=1, ord=2)
+            pts_max_density = 1.0/pts_rect[:,2]**2 #1/dh, 1/dw
+            
         if False and cfg.GT_AUG_ENABLED and self.mode == 'TRAIN':
             # all labels for checking overlapping
             all_gt_obj_list = self.filtrate_dc_objects(self.get_label(sample_id))

@@ -289,7 +289,7 @@ class KittiRCNNDataset(KittiDataset):
         pts_rect = pts_rect[pts_valid_flag][:, 0:3]
         pts_intensity = pts_intensity[pts_valid_flag]
 
-        if cfg.RPN.USE_MAX_DENSITY:
+        if cfg.RPN.USE_MAX_DENSITY:#(add USE_MAX_DENSITY 2020.6.13)
             dw_kitti = 0.08
             dh_kitti = 0.4
             dw_nuscenes = 0.16# 0.1~0.4 ,5~20Hz
