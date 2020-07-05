@@ -8,7 +8,7 @@ AUG_METHOD_LIST: ['rotation', 'scaling', 'flip']
 AUG_METHOD_PROB: [1.0, 1.0, 0.5]
 AUG_ROT_RANGE: 18
 
-GT_AUG_ENABLED: False
+GT_AUG_ENABLED: True
 GT_EXTRA_NUM: 15
 GT_AUG_RAND_NUM: True
 GT_AUG_APPLY_PROB: 1.0
@@ -25,8 +25,6 @@ RPN:
 
     # config of input
     USE_INTENSITY: False
-    USE_DENSITY: False
-    USE_MAX_DENSITY: True
 
     # config of bin-based loss
     LOC_XZ_FINE: True
@@ -77,8 +75,6 @@ RCNN:
     USE_MASK: True
     MASK_TYPE: seg
     USE_INTENSITY: False
-    USE_DENSITY: False
-    USE_MAX_DENSITY: False
     USE_DEPTH: True
     USE_SEG_SCORE: False
 
@@ -133,9 +129,10 @@ RCNN:
 DA:
     ENABLED: True
     DA_IMG:
-        ENABLED: False
+        ENABLED: True
         GRL_WEIGHT: 0.1
         LOSS_WEIGHT: 1.0
+        RESHAPE: True
         POOL: False
         LOSS_CLS: SigmoidFocalLoss
         FOCAL_ALPHA: [0.5, 0.5]
@@ -147,10 +144,9 @@ DA:
         POOL: False
         LOSS_CLS: BinaryCrossEntropy
     DA_INS:
-        ENABLED: True
+        ENABLED: False
         GRL_WEIGHT: 0.1
-        LOSS_WEIGHT: 0.0
-        RESHAPE: True
+        LOSS_WEIGHT: 1.0
     DA_CST:
         ENABLED: False
         LOSS_WEIGHT: 1.0
